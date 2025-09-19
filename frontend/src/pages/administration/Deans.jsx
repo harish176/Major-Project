@@ -150,9 +150,9 @@ export default function DeansPage() {
   const [selectedDean, setSelectedDean] = useState(deans[0]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
       {/* Left Sidebar */}
-      <aside className="w-1/3 bg-[#002147] text-white p-6 space-y-4 shadow-xl">
+      <aside className="w-full lg:w-1/3 bg-[#002147] text-white p-6 space-y-4 shadow-xl">
         <h2 className="text-xl font-bold tracking-wide mb-4">Deans</h2>
         <ul className="space-y-2">
           {deans.map((dean) => (
@@ -173,7 +173,7 @@ export default function DeansPage() {
       </aside>
 
       {/* Right Content */}
-      <main className="flex-1 p-10">
+      <main className="flex-1 p-6 sm:p-8 lg:p-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={selectedDean.name}
@@ -181,24 +181,24 @@ export default function DeansPage() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -60 }}
             transition={{ duration: 0.5 }}
-            className="bg-white rounded-xl shadow-lg p-8"
+            className="bg-white rounded-xl shadow-lg p-6 sm:p-8"
           >
             {/* Header Section */}
-            <div className="flex gap-8 mb-6">
-              <div className="w-40 h-40 rounded-full overflow-hidden shadow-md border-4 border-[#002147]">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8 mb-6">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-md border-4 border-[#002147] mx-auto md:mx-0">
                 <img
                   src={selectedDean.img}
                   alt={selectedDean.name}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-[#002147]">
+              <div className="text-center md:text-left">
+                <h1 className="text-xl sm:text-2xl font-bold text-[#002147]">
                   {selectedDean.name}
                 </h1>
-                <h2 className="text-lg text-gray-600">{selectedDean.designation}</h2>
+                <h2 className="text-md sm:text-lg text-gray-600">{selectedDean.designation}</h2>
                 <p className="mt-4 text-gray-700 leading-relaxed">{selectedDean.bio}</p>
-                <div className="mt-6 space-y-1 text-sm text-gray-600">
+                <div className="mt-6 space-y-1 text-sm sm:text-base text-gray-600">
                   <p><strong>Email:</strong> {selectedDean.email}</p>
                   <p><strong>Phone:</strong> {selectedDean.phone}</p>
                 </div>

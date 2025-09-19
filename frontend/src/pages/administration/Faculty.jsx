@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-
 const Faculty = () => {
   // Data structure
   const data = {
@@ -23,6 +22,13 @@ const Faculty = () => {
         CSE: [
           {
             name: "Dr. R. Verma",
+            designation: "Professor",
+            email: "rverma@manit.ac.in",
+            phone: "0755-4051002",
+            bio: "Specializes in AI, Machine Learning, and Data Science."
+          },
+          {
+            name: "Dr. R. ramesh",
             designation: "Professor",
             email: "rverma@manit.ac.in",
             phone: "0755-4051002",
@@ -168,9 +174,9 @@ const Faculty = () => {
   }
 
   return (
-    <div className="p-1">
+    <div className="p-2 sm:p-4">
       {/* Department Tabs */}
-      <div className="flex space-x-6 border-b-2 border-gray-200 pb-2 mb-6 overflow-x-auto">
+      <div className="flex space-x-3 sm:space-x-6 border-b-2 border-gray-200 pb-2 mb-6 overflow-x-auto">
         {departments.map((dept) => (
           <button
             key={dept}
@@ -181,7 +187,7 @@ const Faculty = () => {
               setSelectedBranch(firstBranch);
               setSelectedFaculty(firstFaculty);
             }}
-            className={`px-4 py-2 rounded-t-lg font-semibold ${
+            className={`px-3 sm:px-4 py-2 rounded-t-lg font-semibold whitespace-nowrap ${
               selectedDept === dept
                 ? "bg-[#002147] text-white"
                 : "bg-gray-100 text-gray-700"
@@ -193,7 +199,7 @@ const Faculty = () => {
       </div>
 
       {/* Branch Tabs */}
-      <div className="flex space-x-4 mb-6 overflow-x-auto">
+      <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 overflow-x-auto">
         {Object.keys(data[selectedDept].branches).map((branch) => (
           <button
             key={branch}
@@ -202,7 +208,7 @@ const Faculty = () => {
               setSelectedBranch(branch);
               setSelectedFaculty(firstFaculty);
             }}
-            className={`px-4 py-2 rounded-full font-medium ${
+            className={`px-3 sm:px-4 py-2 rounded-full font-medium whitespace-nowrap ${
               selectedBranch === branch
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-700"
@@ -213,14 +219,15 @@ const Faculty = () => {
         ))}
       </div>
 
-      <div className="flex gap-6">
+      {/* Faculty Section */}
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Faculty Names */}
-        <div className="w-1/3 bg-gray-50 rounded-xl shadow-md p-4 space-y-3">
+        <div className="w-full lg:w-1/3 bg-gray-50 rounded-xl shadow-md p-4 space-y-3">
           {data[selectedDept].branches[selectedBranch].map((faculty) => (
             <button
               key={faculty.name}
               onClick={() => setSelectedFaculty(faculty)}
-              className={`block w-full text-left px-4 py-2 rounded-lg transition ${
+              className={`block w-full text-left px-3 sm:px-4 py-2 rounded-lg transition ${
                 selectedFaculty.name === faculty.name
                   ? "bg-blue-100 text-blue-900 font-semibold"
                   : "hover:bg-gray-100"
@@ -237,13 +244,13 @@ const Faculty = () => {
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
-          className="flex-1 bg-white shadow-lg rounded-xl p-6 border"
+          className="flex-1 bg-white shadow-lg rounded-xl p-4 sm:p-6 border"
         >
-          <h2 className="text-2xl font-bold text-[#002147]">
+          <h2 className="text-xl sm:text-2xl font-bold text-[#002147]">
             {selectedFaculty.name}
           </h2>
           <p className="text-gray-600">{selectedFaculty.designation}</p>
-          <div className="mt-4 space-y-2 text-gray-700">
+          <div className="mt-4 space-y-2 text-sm sm:text-base text-gray-700">
             <p>
               <strong>Email:</strong> {selectedFaculty.email}
             </p>

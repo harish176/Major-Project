@@ -18,6 +18,14 @@ import DeansFaculty from "./pages/administration/Deans.jsx";
 import Registrar from "./pages/administration/Registrar.jsx";
 import Faculty from "./pages/administration/Faculty.jsx";
 
+//Academics imports
+import UGProgram from "./pages/academics/UGProgram.jsx";
+import PGProgram from "./pages/academics/PGProgram.jsx";
+import PhD from "./pages/academics/PhD.jsx";
+import Scholarship from "./pages/academics/Scholarship.jsx";
+import Dualdegree from "./pages/academics/Dualdegree.jsx";
+import Departments from "./pages/academics/Departments.jsx";
+
 
 export default function App() {
   return (
@@ -38,7 +46,12 @@ export default function App() {
             <Route path="faculty" element={<Faculty />} />
           </Route>
 
-          <Route path="/academics" element={<Academics />} />
+          <Route path="/academics/dual-degree" element={<Dualdegree />} />
+          <Route path="/academics/ug" element={<UGProgram />} />
+          <Route path="/academics/pg" element={<PGProgram />} />
+          <Route path="/academics/phd" element={<PhD />} />
+          <Route path="/academics/departments" element={<Departments />} />
+          <Route path="/academics/scholarship" element={<Scholarship />} />
           <Route path="/research" element={<Research />} />
           <Route path="/facilities" element={<Facilities />} />
           <Route path="/tpc" element={<TPC />} />
