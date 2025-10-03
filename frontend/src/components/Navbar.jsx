@@ -10,6 +10,8 @@ import {
   FaBriefcase,
   FaUsers,
   FaHome,
+  FaBell,
+  FaUser
 } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
 
@@ -24,6 +26,7 @@ export default function Navbar() {
     { to: "/facilities", label: "Facilities", icon: <FaBuilding /> },
     { to: "/tpc", label: "TPC", icon: <FaBriefcase /> },
     { to: "/clubs", label: "Clubs", icon: <FaUsers /> },
+    { to: "/notice", label: "Notice", icon: <FaBell /> },
   ];
 
   const academicDropdown = [
@@ -36,16 +39,16 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-white shadow-md fixed w-full top-0 left-0 z-50">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+    <nav className="bg-white shadow-md fixed w-full top-0 left-0 z-[100]">
+      <div className="max-w-7xl mx-auto grid grid-cols-3 items-center px-6 py-4">
         {/* Logo */}
-        <div className="flex items-center">
+        <div className="flex items-center justify-start">
           <img src="/logo.jpg" alt="Logo" className="h-10 w-10 mr-3" />
           <span className="font-bold text-xl text-[#002147]">MANIT</span>
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex gap-6 text-gray-700 font-medium relative">
+        <div className="hidden md:flex gap-6 text-gray-700 font-medium relative justify-center">
           {navLinks.map((link) =>
             link.dropdown ? (
               <div key={link.label} className="relative group">
@@ -96,18 +99,30 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Hamburger Button (Mobile) */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-2xl text-gray-700"
-        >
-          {isOpen ? <FaTimes /> : <FaBars />}
-        </button>
+        {/* Right Side - Login Button & Mobile Menu */}
+        <div className="flex items-center justify-end">
+          {/* Login Button (Desktop) */}
+          <NavLink 
+            to="/login"
+            className="hidden md:flex items-center gap-2 bg-[#002147] text-white px-4 py-2 rounded-lg hover:bg-[#003366] transition-colors duration-300 font-medium cursor-pointer"
+          >
+            <FaUser className="text-sm" />
+            Login/Signup
+          </NavLink>
+
+          {/* Hamburger Button (Mobile) */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden text-2xl text-gray-700"
+          >
+            {isOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white shadow-lg">
+        <div className="md:hidden bg-white shadow-lg z-[100]">
           <div className="flex flex-col items-start gap-4 px-6 py-4">
             {navLinks.map((link) =>
               link.dropdown ? (
@@ -145,6 +160,16 @@ export default function Navbar() {
                 </NavLink>
               )
             )}
+            
+            {/* Mobile Login Button */}
+            <NavLink 
+              to="/login"
+              className="flex items-center gap-2 bg-[#002147] text-white px-4 py-2 rounded-lg hover:bg-[#003366] transition-colors duration-300 font-medium mt-2 w-full justify-center cursor-pointer"
+              onClick={() => setIsOpen(false)}
+            >
+              <FaUser className="text-sm" />
+              Login/Signup
+            </NavLink>
           </div>
         </div>
       )}

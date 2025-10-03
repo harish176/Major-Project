@@ -40,3 +40,85 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Notice Page Styles */
+.notice-page {
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.notice-page .container {
+  max-width: 1200px;
+}
+
+.notice-page .grid {
+  display: grid;
+}
+
+.notice-page .grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.notice-page .gap-8 {
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .notice-page .lg\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.notice-page h1 {
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.notice-page .bg-white {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.notice-page .divide-y > :not([hidden]) ~ :not([hidden]) {
+  border-top: 1px solid #e5e7eb;
+}
+
+.notice-page .hover\:bg-gray-50:hover {
+  background-color: #f9fafb;
+}
+
+.notice-page .text-blue-600 {
+  color: #2563eb;
+}
+
+.notice-page .text-blue-600:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.notice-page .text-gray-500 {
+  color: #6b7280;
+}
+
+.notice-page .text-gray-700 {
+  color: #374151;
+}
+
+.notice-page .text-gray-800 {
+  color: #1f2937;
+}
+
+.notice-page .bg-red-500 {
+  background-color: #ef4444;
+}
+
+.notice-page .bg-blue-500 {
+  background-color: #3b82f6;
+}
+
+.notice-page .transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}

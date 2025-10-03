@@ -26,6 +26,15 @@ import Scholarship from "./pages/academics/Scholarship.jsx";
 import Dualdegree from "./pages/academics/Dualdegree.jsx";
 import Departments from "./pages/academics/Departments.jsx";
 
+//TPC imports
+import TPCHome from "./pages/tpc/TPCHome.jsx";
+import PlacementTeam from "./pages/tpc/PlacementTeam.jsx";
+import PlacementPolicy from "./pages/tpc/PlacementPolicy.jsx";
+
+import Notice from "./pages/Notice.jsx";
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
+
 
 export default function App() {
   return (
@@ -54,8 +63,19 @@ export default function App() {
           <Route path="/academics/scholarship" element={<Scholarship />} />
           <Route path="/research" element={<Research />} />
           <Route path="/facilities" element={<Facilities />} />
-          <Route path="/tpc" element={<TPC />} />
+          
+          {/* Nested TPC Routes */}
+          <Route path="/tpc/*" element={<TPC />}>
+            <Route path="home" element={<TPCHome />} />
+            <Route path="placement-team" element={<PlacementTeam />} />
+            <Route path="placement-policy" element={<PlacementPolicy />} />
+            <Route index element={<TPCHome />} />
+          </Route>
+          
           <Route path="/clubs" element={<Clubs />} />
+          <Route path="/notice" element={<Notice />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
           {/* 404 Page */}
           <Route path="*" element={<h1>404 - Page Not Found</h1>} />
