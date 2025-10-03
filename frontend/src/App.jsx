@@ -1,6 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import Administration from "./pages/Administration.jsx";
+import StudentDashboard from "./pages/student/StudentDashboard.jsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Academics from "./pages/Academics.jsx";
 import Research from "./pages/Research.jsx";
 import Facilities from "./pages/Facilities.jsx";
@@ -35,12 +38,20 @@ import Notice from "./pages/Notice.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 
+// Component to handle conditional navbar rendering
+function AppContent() {
+  const location = useLocation();
+  
+  // Define routes where navbar and footer should be hidden
+  const hideNavbarRoutes = ['/student-dashboard', '/admin-dashboard'];
+  
+  // Check if current route should hide navbar
+  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
-export default function App() {
   return (
-    <Router>
-      <Navbar />
-      <div className="p-6 pt-20">
+    <>
+      {!shouldHideNavbar && <Navbar />}
+      <div className={shouldHideNavbar ? "" : "p-6 pt-20"}>
         <Routes>
           {/* Main Routes */}
           <Route path="/" element={<Home />} />
@@ -55,6 +66,7 @@ export default function App() {
             <Route path="faculty" element={<Faculty />} />
           </Route>
 
+          <Route path="/academics" element={<Academics />} />
           <Route path="/academics/dual-degree" element={<Dualdegree />} />
           <Route path="/academics/ug" element={<UGProgram />} />
           <Route path="/academics/pg" element={<PGProgram />} />
@@ -76,12 +88,30 @@ export default function App() {
           <Route path="/notice" element={<Notice />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/student-dashboard" element={
+            <ProtectedRoute requiredRole="student">
+              <StudentDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin-dashboard" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
 
           {/* 404 Page */}
           <Route path="*" element={<h1>404 - Page Not Found</h1>} />
         </Routes>
       </div>
-      <Footer />
+      {!shouldHideNavbar && <Footer />}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
