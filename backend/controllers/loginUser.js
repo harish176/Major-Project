@@ -125,3 +125,74 @@ export const logoutUser = async (req, res) => {
     });
   }
 };
+
+export const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token is required'
+      });
+    }
+
+    // Import JWT utilities
+    const { verifyRefreshToken, generateTokenPair } = await import('../utils/jwt.js');
+
+    // Verify refresh token
+    const decoded = verifyRefreshToken(refreshToken);
+    
+    // Find user in database
+    const user = await Student.findById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (!user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
+
+    // Generate new token pair
+    const tokens = generateTokenPair(user);
+
+    // Prepare user data for response
+    const userData = {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      lastLogin: user.lastLogin,
+      studentName: user.studentName,
+      name: user.studentName,
+      status: user.status,
+      studentPhone: user.studentPhone,
+      studentPhotoUrl: user.studentPhotoUrl
+    };
+
+    res.json({
+      success: true,
+      message: 'Token refreshed successfully',
+      data: {
+        user: userData,
+        token: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn: tokens.expiresIn
+      }
+    });
+
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    res.status(401).json({
+      success: false,
+      message: 'Invalid or expired refresh token'
+    });
+  }
+};

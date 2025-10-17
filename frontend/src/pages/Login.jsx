@@ -92,13 +92,32 @@ const Login = () => {
       // Always ensure loading toast is dismissed in catch block
       dismissToast(loadingToastId);
       
-      // Axios error handling is done by interceptor in api.js
-      // But we can add additional specific handling here if needed
       console.error('Login error:', error);
       
-      // If error wasn't handled by interceptor, show generic message
-      if (!error.response) {
+      // Handle specific error types
+      if (error.response) {
+        // Server responded with error status
+        const { status, data } = error.response;
+        
+        if (status === 401) {
+          // Invalid credentials or authentication error
+          showError(data.message || 'Invalid email or password. Please try again.');
+        } else if (status === 400) {
+          // Bad request (validation errors)
+          showError(data.message || 'Please check your input and try again.');
+        } else if (status >= 500) {
+          // Server error
+          showError('Server error. Please try again later.');
+        } else {
+          // Other HTTP errors
+          showError(data.message || 'Login failed. Please try again.');
+        }
+      } else if (error.request) {
+        // Network error
         showError('Network error. Please check your connection and try again.');
+      } else {
+        // Something else happened
+        showError('An unexpected error occurred. Please try again.');
       }
     }
   };

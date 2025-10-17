@@ -9,14 +9,13 @@ import {
 } from '../controllers/studentController.js';
 import { adminOnly, studentOnly, authenticatedOnly } from '../middleware/authMiddleware.js';
 import Student from '../models/Student.js';
-// import { validateStudentRegistration, validateStatusUpdate } from '../middleware/validationMiddleware.js';
 
 const router = express.Router();
 
 // @route   POST /api/students/register
 // @desc    Register a new student
 // @access  Public
-router.post('/register', registerStudent); // Add validateStudentRegistration middleware when express-validator is installed
+router.post('/register', registerStudent);
 
 // @route   GET /api/students/stats
 // @desc    Get student statistics
