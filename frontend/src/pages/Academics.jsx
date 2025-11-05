@@ -9,9 +9,12 @@ function Accordion({ title, children }) {
       {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-left bg-[#002147] text-white px-4 py-2 font-semibold"
+        className="w-full text-left bg-[#002147] text-white px-4 py-2 font-semibold flex justify-between items-center"
       >
         {title}
+        <span className={`transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+          ▼
+        </span>
       </button>
 
       {/* Content */}
@@ -33,7 +36,7 @@ function Accordion({ title, children }) {
   );
 }
 
-export default function App() {
+export default function Academics() {
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
       {/* Header */}
