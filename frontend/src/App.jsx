@@ -3,11 +3,11 @@ import Navbar from "./components/Navbar.jsx";
 import Administration from "./pages/Administration.jsx";
 import StudentDashboard from "./pages/student/StudentDashboard.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import AdminStudents from "./pages/admin/AdminStudents.jsx";
 import AdminFaculty from "./pages/admin/AdminFaculty.jsx";
 import AdminTPC from "./pages/admin/AdminTPC.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Academics from "./pages/Academics.jsx";
-import Research from "./pages/Research.jsx";
 import Facilities from "./pages/Facilities.jsx";
 import TPC from "./pages/TPC.jsx";
 import Clubs from "./pages/Clubs.jsx";
@@ -45,7 +45,7 @@ function AppContent() {
   const location = useLocation();
   
   // Define routes where navbar and footer should be hidden
-  const hideNavbarRoutes = ['/student-dashboard', '/admin-dashboard', '/admin/faculty', '/admin/tpc'];
+  const hideNavbarRoutes = ['/student-dashboard', '/admin-dashboard', '/admin/students', '/admin/faculty', '/admin/tpc'];
   
   // Check if current route should hide navbar
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
@@ -75,7 +75,6 @@ function AppContent() {
           <Route path="/academics/phd" element={<PhD />} />
           <Route path="/academics/departments" element={<Departments />} />
           <Route path="/academics/scholarship" element={<Scholarship />} />
-          <Route path="/research" element={<Research />} />
           <Route path="/facilities" element={<Facilities />} />
           
           {/* Nested TPC Routes */}
@@ -98,6 +97,11 @@ function AppContent() {
           <Route path="/admin-dashboard" element={
             <ProtectedRoute requiredRole="admin">
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/students" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminStudents />
             </ProtectedRoute>
           } />
           <Route path="/admin/faculty" element={

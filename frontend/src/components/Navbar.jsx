@@ -5,7 +5,6 @@ import {
   FaTimes,
   FaUserTie,
   FaBook,
-  FaFlask,
   FaBuilding,
   FaBriefcase,
   FaUsers,
@@ -22,7 +21,6 @@ export default function Navbar() {
     { to: "/", label: "Home", icon: <FaHome /> },
     { to: "/administration", label: "Administration", icon: <FaUserTie /> },
     { label: "Academics", icon: <FaBook />, dropdown: true }, // removed "to"
-    { to: "/research", label: "Research", icon: <FaFlask /> },
     { to: "/facilities", label: "Facilities", icon: <FaBuilding /> },
     { to: "/tpc", label: "TPC", icon: <FaBriefcase /> },
     { to: "/clubs", label: "Clubs", icon: <FaUsers /> },

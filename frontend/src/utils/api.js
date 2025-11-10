@@ -121,9 +121,15 @@ export const studentAPI = {
 };
 
 export const adminAPI = {
-  getStudents: () => api.get('/students'),
+  // Student Management
+  getStudents: (params) => api.get('/students', { params }),
+  getStudentById: (id) => api.get(`/students/${id}`),
+  updateStudent: (id, studentData) => api.put(`/students/${id}`, studentData),
   approveStudent: (studentId) => api.put(`/students/${studentId}/status`, { status: 'approved' }),
   rejectStudent: (studentId) => api.put(`/students/${studentId}/status`, { status: 'rejected' }),
+  updateStudentStatus: (studentId, status) => api.put(`/students/${studentId}/status`, { status }),
+  deleteStudent: (id) => api.delete(`/students/${id}`),
+  getStudentStats: () => api.get('/students/stats'),
 };
 
 export const facultyAPI = {
@@ -154,6 +160,52 @@ export const tpcMemberAPI = {
 
   // Statistics
   getStats: () => api.get('/tpc-members/stats'),
+};
+
+export const companyAPI = {
+  // CRUD operations
+  createCompany: (companyData) => api.post('/companies', companyData),
+  getAllCompanies: (params) => api.get('/companies', { params }),
+  getCompanyById: (id) => api.get(`/companies/${id}`),
+  updateCompany: (id, companyData) => api.put(`/companies/${id}`, companyData),
+  deleteCompany: (id) => api.delete(`/companies/${id}`),
+  permanentlyDeleteCompany: (id) => api.delete(`/companies/${id}/permanent`),
+  restoreCompany: (id) => api.patch(`/companies/${id}/restore`),
+
+  // Filter operations
+  getCompaniesByDateRange: (startDate, endDate) => api.get('/companies/date-range', { 
+    params: { startDate, endDate } 
+  }),
+  getCompaniesByBranch: (branch, year) => api.get(`/companies/branch/${branch}`, { 
+    params: year ? { year } : {} 
+  }),
+  getCompaniesByCourse: (course, year) => api.get(`/companies/course/${course}`, { 
+    params: year ? { year } : {} 
+  }),
+
+  // Yearly data operations
+  addYearlyData: (id, yearlyData) => api.post(`/companies/${id}/yearly-data`, yearlyData),
+
+  // Statistics
+  getStats: () => api.get('/companies/stats'),
+};
+
+export const placementAPI = {
+  // CRUD operations
+  createPlacement: (placementData) => api.post('/placements', placementData),
+  getAllPlacements: (params) => api.get('/placements', { params }),
+  getPlacementById: (id) => api.get(`/placements/${id}`),
+  updatePlacement: (id, placementData) => api.put(`/placements/${id}`, placementData),
+  deletePlacement: (id) => api.delete(`/placements/${id}`),
+  permanentlyDeletePlacement: (id) => api.delete(`/placements/${id}/permanent`),
+
+  // Filter operations
+  getPlacementsByStudent: (scholarNumber) => api.get(`/placements/student/${scholarNumber}`),
+  getPlacementsByCompany: (companyName) => api.get(`/placements/company/${encodeURIComponent(companyName)}`),
+  getStudentByScholarNumber: (scholarNumber) => api.get(`/students/scholar/${scholarNumber}`),
+
+  // Statistics
+  getStats: () => api.get('/placements/stats'),
 };
 
 export default api;

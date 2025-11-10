@@ -31,6 +31,7 @@ const Signup = () => {
     income: '',
     
     // Academic Information
+    scholarNumber: '',
     jeeMainRank: '',
     jeeAdvancedRank: '',
     branch: '',
@@ -260,6 +261,7 @@ const Signup = () => {
         income: formData.income ? parseFloat(formData.income) : null,
         
         // Academic Information
+        scholarNumber: formData.scholarNumber,
         jeeMainRank: formData.jeeMainRank ? parseInt(formData.jeeMainRank) : null,
         jeeAdvancedRank: formData.jeeAdvancedRank ? parseInt(formData.jeeAdvancedRank) : null,
         branch: formData.branch,
@@ -311,6 +313,7 @@ const Signup = () => {
           motherOccupation: '',
           category: '',
           income: '',
+          scholarNumber: '',
           jeeMainRank: '',
           jeeAdvancedRank: '',
           branch: '',
@@ -663,6 +666,27 @@ const Signup = () => {
             {/* Academic Information */}
             <div className="col-span-1 md:col-span-2">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2 mt-6">Academic Information</h3>
+            </div>
+
+            {/* Scholar Number */}
+            <div>
+              <label htmlFor="scholarNumber" className="block text-sm font-medium text-gray-700">
+                Scholar Number
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaIdCard className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="scholarNumber"
+                  name="scholarNumber"
+                  type="text"
+                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Enter scholar number (e.g., 22104056)"
+                  value={formData.scholarNumber}
+                  onChange={handleInputChange}
+                />
+              </div>
             </div>
 
             {/* JEE Main Rank */}

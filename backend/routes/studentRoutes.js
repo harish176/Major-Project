@@ -3,6 +3,7 @@ import {
   registerStudent,
   getAllStudents,
   getStudentById,
+  updateStudent,
   updateStudentStatus,
   deleteStudent,
   getStudentStats
@@ -100,10 +101,44 @@ router.put('/profile', studentOnly, async (req, res) => {
 // @access  Private/Admin
 router.get('/', adminOnly, getAllStudents);
 
+// @route   GET /api/students/scholar/:scholarNumber
+// @desc    Get student by scholar number
+// @access  Private
+router.get('/scholar/:scholarNumber', authenticatedOnly, async (req, res) => {
+  try {
+    const { scholarNumber } = req.params;
+    
+    const student = await Student.findOne({ scholarNumber }).select('-password');
+    
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found with this scholar number'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: student
+    });
+  } catch (error) {
+    console.error('Get student by scholar number error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
 // @route   GET /api/students/:id
 // @desc    Get student by ID
 // @access  Private (Admin or own profile for student)
 router.get('/:id', authenticatedOnly, getStudentById);
+
+// @route   PUT /api/students/:id
+// @desc    Update student information
+// @access  Private/Admin
+router.put('/:id', adminOnly, updateStudent);
 
 // @route   PUT /api/students/:id/status
 // @desc    Update student status (approve/reject)

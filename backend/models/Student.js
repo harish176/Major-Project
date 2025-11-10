@@ -9,6 +9,14 @@ const studentSchema = new mongoose.Schema({
     trim: true,
     maxlength: [100, 'Student name cannot exceed 100 characters']
   },
+  scholarNumber: {
+    type: String,
+    required: false, // Made optional to handle existing users
+    unique: true,
+    sparse: true, // Allows multiple null values for unique constraint
+    trim: true,
+    maxlength: [20, 'Scholar number cannot exceed 20 characters']
+  },
   studentPhone: {
     type: String,
     required: [true, 'Student phone is required'],
@@ -185,6 +193,7 @@ const studentSchema = new mongoose.Schema({
 });
 
 // Additional indexes for better performance (unique fields already have indexes)
+studentSchema.index({ scholarNumber: 1 });
 studentSchema.index({ status: 1 });
 studentSchema.index({ createdAt: -1 });
 

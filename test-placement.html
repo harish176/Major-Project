@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Placement API</title>
+</head>
+<body>
+    <h1>Test Placement Creation</h1>
+    <button onclick="testPlacementCreation()">Test Create Placement</button>
+    <div id="result"></div>
+
+    <script>
+        async function testPlacementCreation() {
+            const token = localStorage.getItem('token'); // Get from localStorage if you have it
+            
+            const testPlacementData = {
+                companyName: "Test Company",
+                scholarNumber: "12345678",
+                studentName: "Test Student",
+                placementType: "FTE",
+                package: 500000,
+                status: "offered"
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/api/placements', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(testPlacementData)
+                });
+
+                const result = await response.json();
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>Response Status: ${response.status}</h3>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+                
+                console.log('Response:', result);
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <h3>Error:</h3>
+                    <pre>${error.message}</pre>
+                `;
+                console.error('Error:', error);
+            }
+        }
+
+        // Check if we have a token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            document.getElementById('result').innerHTML = '<p style="color: red;">No authentication token found. Please login first.</p>';
+        }
+    </script>
+</body>
+</html>
+</code>

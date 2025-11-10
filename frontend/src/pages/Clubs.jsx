@@ -284,7 +284,13 @@ const ClubModal = ({ club, isOpen, onClose }) => {
           <div className="sticky top-0 bg-gradient-to-r from-[#002147] to-blue-600 text-white p-6 rounded-t-2xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="text-4xl">{club.icon}</div>
+                <div className="text-4xl">
+                  {typeof club.icon === 'string' ? (
+                    club.icon
+                  ) : (
+                    React.createElement(club.icon, { size: 48, className: 'text-white' })
+                  )}
+                </div>
                 <div>
                   <h2 className="text-2xl font-bold">{club.name}</h2>
                   {club.functions && (
@@ -408,7 +414,11 @@ const ClubCard = ({ club, index, onKnowMore }) => {
       <div className="p-6 relative z-10">
         {/* Club icon */}
         <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
-          {typeof club.icon === 'string' ? club.icon : <club.icon size={48} />}
+          {typeof club.icon === 'string' ? (
+            club.icon
+          ) : (
+            React.createElement(club.icon, { size: 48 })
+          )}
         </div>
 
         {/* Club name */}

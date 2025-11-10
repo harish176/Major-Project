@@ -35,6 +35,12 @@ const AdminNavbar = ({ user }) => {
       name: 'Dashboard',
       path: '/admin-dashboard',
       icon: FaTachometerAlt,
+      description: 'Admin Dashboard'
+    },
+    {
+      name: 'Students',
+      path: '/admin/students',
+      icon: FaUsers,
       description: 'Student Management'
     },
     {

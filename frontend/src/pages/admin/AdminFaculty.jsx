@@ -319,7 +319,6 @@ const AdminFaculty = () => {
 
   // Handle edit faculty - populate form with existing data
   const handleEditFaculty = (faculty) => {
-    console.log('Editing faculty:', faculty);
     
     // Set the form data with existing faculty information
     setFacultyForm({
