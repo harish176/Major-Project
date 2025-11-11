@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPC Member API Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        .sample-data {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .sample-data pre {
+            margin: 0;
+            overflow-x: auto;
+        }
+        
+        .api-endpoint {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-success { background: #d4edda; color: #155724; }
+        .status-error { background: #f8d7da; color: #721c24; }
+        .status-warning { background: #fff3cd; color: #856404; }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        #results {
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 TPC Member Management System Demo</h1>
+        
+        <p>This demo showcases the complete TPC (Training & Placement Cell) Member management system.</p>
+        
+        <div class="status-indicator status-warning">
+            ⚠️ Make sure your backend server is running on localhost:5000
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📋 Sample TPC Member Data</h2>
+        
+        <h3>Faculty Member Example:</h3>
+        <div class="sample-data">
+            <pre>{
+  "name": "Meghna Kamrakar",
+  "contact_no": "9993804738",
+  "department": "MCA",
+  "team": "MCA",
+  "role": "Member",
+  "category": "faculty",
+  "session": ["2025-2026"],
+  "email": "meghna@example.com",
+  "facultyInfo": {
+    "employeeId": "FAC001",
+    "designation": "Assistant Professor"
+  },
+  "responsibilities": ["Student Coordination", "Interview Process"],
+  "notes": "Experienced in placement activities"
+}</pre>
+        </div>
+
+        <h3>Student Member Example:</h3>
+        <div class="sample-data">
+            <pre>{
+  "name": "Rahul Kumar",
+  "contact_no": "9876543210",
+  "department": "CSE",
+  "team": "B-Tech",
+  "role": "Head",
+  "category": "b-tech",
+  "session": ["2025-2026"],
+  "email": "rahul@example.com",
+  "studentInfo": {
+    "rollNumber": "CSE2021001",
+    "year": 4,
+    "semester": 8
+  },
+  "responsibilities": ["Team Leadership", "Event Management"]
+}</pre>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔌 API Endpoints</h2>
+        
+        <div class="api-endpoint">
+            <strong>GET /api/tpc-members</strong> - Get all TPC members
+            <br><small>Public endpoint, no authentication required</small>
+        </div>
+        
+        <div class="api-endpoint">
+            <strong>GET /api/tpc-members/stats</strong> - Get TPC statistics
+            <br><small>Public endpoint, returns member distribution data</small>
+        </div>
+        
+        <div class="api-endpoint">
+            <strong>GET /api/tpc-members/category/:category</strong> - Filter by category
+            <br><small>Categories: faculty, b-tech, m-tech, mca, phd</small>
+        </div>
+        
+        <div class="api-endpoint">
+            <strong>POST /api/tpc-members</strong> - Create new member
+            <br><small>🔒 Requires authentication</small>
+        </div>
+        
+        <div class="api-endpoint">
+            <strong>PUT /api/tpc-members/:id</strong> - Update member
+            <br><small>🔒 Requires authentication</small>
+        </div>
+        
+        <div class="api-endpoint">
+            <strong>DELETE /api/tpc-members/:id</strong> - Delete member (soft delete)
+            <br><small>🔒 Requires authentication</small>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🧪 API Testing</h2>
+        
+        <p>Test the API endpoints to verify functionality:</p>
+        
+        <button onclick="testGetAllMembers()">📋 Get All Members</button>
+        <button onclick="testGetStats()">📊 Get Statistics</button>
+        <button onclick="testFilterByCategory()">🔍 Filter by Faculty</button>
+        <button onclick="testCreateMember()">➕ Create Member (No Auth)</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <div class="container">
+        <h2>💡 Usage Instructions</h2>
+        
+        <h3>Frontend Usage:</h3>
+        <ol>
+            <li>Navigate to Admin Dashboard in your React app</li>
+            <li>Go to TPC section</li>
+            <li>Click on "TPC Members" tab</li>
+            <li>Use "Add Member" button to create new members</li>
+            <li>Select appropriate category (faculty/b-tech/m-tech/mca/phd)</li>
+            <li>Fill in category-specific fields automatically shown</li>
+            <li>Save to create the member</li>
+        </ol>
+        
+        <h3>Category System:</h3>
+        <ul>
+            <li><strong>faculty</strong> - Shows Employee ID, Designation fields</li>
+            <li><strong>b-tech/m-tech/mca/phd</strong> - Shows Roll Number, Year, Semester fields</li>
+        </ul>
+        
+        <h3>Role Options:</h3>
+        <ul>
+            <li>Head, Co-Head, Member, Coordinator, Assistant Coordinator</li>
+        </ul>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        
+        function logResult(title, status, data) {
+            const results = document.getElementById('results');
+            const statusClass = status >= 200 && status < 300 ? 'status-success' : 'status-error';
+            
+            const item = document.createElement('div');
+            item.className = 'result-item';
+            item.innerHTML = `
+                <strong>${title}</strong> 
+                <span class="status-indicator ${statusClass}">${status}</span>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            
+            results.insertBefore(item, results.firstChild);
+        }
+        
+        async function testGetAllMembers() {
+            try {
+                const response = await fetch(`${API_BASE}/tpc-members`);
+                const data = await response.json();
+                logResult('Get All Members', response.status, data);
+            } catch (error) {
+                logResult('Get All Members', 'ERROR', { error: error.message });
+            }
+        }
+        
+        async function testGetStats() {
+            try {
+                const response = await fetch(`${API_BASE}/tpc-members/stats`);
+                const data = await response.json();
+                logResult('Get Statistics', response.status, data);
+            } catch (error) {
+                logResult('Get Statistics', 'ERROR', { error: error.message });
+            }
+        }
+        
+        async function testFilterByCategory() {
+            try {
+                const response = await fetch(`${API_BASE}/tpc-members/category/faculty`);
+                const data = await response.json();
+                logResult('Filter by Faculty', response.status, data);
+            } catch (error) {
+                logResult('Filter by Faculty', 'ERROR', { error: error.message });
+            }
+        }
+        
+        async function testCreateMember() {
+            const sampleMember = {
+                name: 'Test Member',
+                contact_no: '9999999999',
+                department: 'CSE',
+                team: 'Test Team',
+                role: 'Member',
+                category: 'faculty',
+                session: ['2025-2026']
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/tpc-members`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(sampleMember)
+                });
+                const data = await response.json();
+                logResult('Create Member (Expected 401)', response.status, data);
+            } catch (error) {
+                logResult('Create Member', 'ERROR', { error: error.message });
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        // Auto-test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                console.log('🚀 TPC Member API Demo loaded!');
+                console.log('💡 Use the buttons to test API endpoints');
+            }, 100);
+        });
+    </script>
+</body>
+</html>

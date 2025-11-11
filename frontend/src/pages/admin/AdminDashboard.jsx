@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FaUsers, FaUserCheck, FaUserClock, FaUserTimes, FaSearch, FaEye, FaCheck, FaTimes, FaSignOutAlt, FaDownload } from 'react-icons/fa';
+import { FaUsers, FaUserCheck, FaUserClock, FaUserTimes, FaSearch, FaEye, FaCheck, FaTimes, FaDownload } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { showError, showSuccess, showLoading, dismissToast } from '../../utils/toast.js';
-import { adminAPI, authAPI } from '../../utils/api.js';
+import { adminAPI } from '../../utils/api.js';
+import AdminNavbar from './AdminNavbar.jsx';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -97,27 +98,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLogout = async () => {
-    const loadingToast = showLoading('Signing out...');
-    
-    try {
-      // Call logout API (optional - JWT is stateless)
-      await authAPI.logout();
-    } catch (error) {
-      // Continue with logout even if API call fails
-      console.warn('Logout API call failed, continuing with client-side logout:', error);
-    }
-    
-    // Always clear local storage and logout user
-    dismissToast(loadingToast);
-    
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    
-    showSuccess('Logged out successfully');
-    navigate('/login');
-  };
+
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -169,24 +150,17 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Admin Navigation */}
+      <AdminNavbar user={user} />
+
       {/* Header */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <img src="/logo.jpg" alt="MANIT Logo" className="h-10 w-10 mr-3" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-sm text-gray-600">Welcome back, {user.studentName || user.name}</p>
-              </div>
+          <div className="py-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Student Management Dashboard</h1>
+              <p className="text-sm text-gray-600">Manage student registrations and approvals</p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-100 rounded-md hover:bg-red-200 transition-colors duration-200"
-            >
-              <FaSignOutAlt className="mr-2" />
-              Logout
-            </button>
           </div>
         </div>
       </div>

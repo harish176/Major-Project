@@ -2,7 +2,6 @@ import React from "react";
 import Carousel from "../components/Carousel.jsx";
 import { motion } from "framer-motion";
 import LifeAtManit from "../components/LifeatManit.jsx";
-import ResearchWorks from "../components/Researchworks.jsx";
 import Location from "../components/Location.jsx";
 import Placements from "../components/Placements.jsx";
 
@@ -71,7 +70,6 @@ const Home = () => {
   </div>
 </section>
       <LifeAtManit />
-      <ResearchWorks />
       <Placements />
       <Location />
     </div>

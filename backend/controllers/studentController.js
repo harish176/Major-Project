@@ -11,6 +11,7 @@ export const registerStudent = async (req, res) => {
     // Extract data from request body
     const {
       studentName,
+      scholarNumber,
       studentPhone,
       email,
       password,
@@ -54,6 +55,17 @@ export const registerStudent = async (req, res) => {
       });
     }
 
+    // Check for duplicate scholar number if provided
+    if (scholarNumber) {
+      const existingScholar = await Student.findOne({ scholarNumber });
+      if (existingScholar) {
+        return res.status(400).json({
+          success: false,
+          message: 'Student with this scholar number already exists'
+        });
+      }
+    }
+
     // Check for duplicate Aadhar number if provided
     if (aadharNumber) {
       const existingAadhar = await Student.findOne({ aadharNumber });
@@ -68,6 +80,7 @@ export const registerStudent = async (req, res) => {
     // Create student data object
     const studentData = {
       studentName,
+      scholarNumber,
       studentPhone,
       email,
       password, // Will be hashed by the pre-save middleware
@@ -115,6 +128,7 @@ export const registerStudent = async (req, res) => {
       data: {
         studentId: savedStudent._id,
         studentName: savedStudent.studentName,
+        scholarNumber: savedStudent.scholarNumber,
         email: savedStudent.email,
         role: savedStudent.role,
         status: savedStudent.status,
@@ -134,6 +148,7 @@ export const registerStudent = async (req, res) => {
       // Make field names more user-friendly
       if (duplicateField === 'studentPhone') fieldName = 'phone number';
       if (duplicateField === 'aadharNumber') fieldName = 'Aadhar number';
+      if (duplicateField === 'scholarNumber') fieldName = 'scholar number';
       
       return res.status(400).json({
         success: false,
@@ -284,6 +299,136 @@ export const updateStudentStatus = async (req, res) => {
   } catch (error) {
     console.error('Update student status error:', error);
     
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid student ID'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// @desc    Update student information
+// @route   PUT /api/students/:id
+// @access  Private/Admin
+export const updateStudent = async (req, res) => {
+  try {
+    const studentId = req.params.id;
+    const updateData = req.body;
+
+    // Remove password from update data for security
+    delete updateData.password;
+
+    // Check if updating email or phone, ensure they're not already taken by another student
+    if (updateData.email || updateData.studentPhone) {
+      const existingStudent = await Student.findOne({
+        $or: [
+          updateData.email ? { email: updateData.email } : null,
+          updateData.studentPhone ? { studentPhone: updateData.studentPhone } : null
+        ].filter(Boolean),
+        _id: { $ne: studentId }
+      });
+
+      if (existingStudent) {
+        const duplicateField = existingStudent.email === updateData.email ? 'email' : 'phone number';
+        return res.status(400).json({
+          success: false,
+          message: `A student with this ${duplicateField} already exists`
+        });
+      }
+    }
+
+    // Check for duplicate scholar number if provided
+    if (updateData.scholarNumber) {
+      const existingScholar = await Student.findOne({ 
+        scholarNumber: updateData.scholarNumber,
+        _id: { $ne: studentId }
+      });
+      if (existingScholar) {
+        return res.status(400).json({
+          success: false,
+          message: 'A student with this scholar number already exists'
+        });
+      }
+    }
+
+    // Check for duplicate Aadhar number if provided
+    if (updateData.aadharNumber) {
+      const existingAadhar = await Student.findOne({ 
+        aadharNumber: updateData.aadharNumber,
+        _id: { $ne: studentId }
+      });
+      if (existingAadhar) {
+        return res.status(400).json({
+          success: false,
+          message: 'A student with this Aadhar number already exists'
+        });
+      }
+    }
+
+    // Convert date string to Date object if provided
+    if (updateData.dateOfJoining) {
+      updateData.dateOfJoining = new Date(updateData.dateOfJoining);
+    }
+
+    // Remove empty/null values
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === '' || updateData[key] === null || updateData[key] === undefined) {
+        delete updateData[key];
+      }
+    });
+
+    const updatedStudent = await Student.findByIdAndUpdate(
+      studentId,
+      { ...updateData, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!updatedStudent) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Student updated successfully',
+      data: updatedStudent
+    });
+
+  } catch (error) {
+    console.error('Update student error:', error);
+    
+    if (error.code === 11000) {
+      // Duplicate key error
+      const duplicateField = Object.keys(error.keyPattern)[0];
+      let fieldName = duplicateField;
+      
+      if (duplicateField === 'studentPhone') fieldName = 'phone number';
+      if (duplicateField === 'aadharNumber') fieldName = 'Aadhar number';
+      if (duplicateField === 'scholarNumber') fieldName = 'scholar number';
+      
+      return res.status(400).json({
+        success: false,
+        message: `A student with this ${fieldName} already exists`
+      });
+    }
+
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors
+      });
+    }
+
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
