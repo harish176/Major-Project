@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const Facilities = () => {
+export default function Facilities() {
   const [selectedFacility, setSelectedFacility] = useState(null);
   const [showFullPage, setShowFullPage] = useState(false);
   const [selectedCCFSection, setSelectedCCFSection] = useState(null);
@@ -752,7 +752,7 @@ const Facilities = () => {
   };
 
   // Individual CCF Section Page
-if (selectedCCFSection) {
+  if (selectedCCFSection) {
     return (
       <div style={{ padding: "2rem", maxWidth: "1400px", margin: "0 auto" }}>
         <button
@@ -1542,3 +1542,1026 @@ if (selectedCCFSection) {
       </div>
     );
   }
+
+  // Full Page Render for specific facilities (Central Library, CCF, Dispensary)
+  if (showFullPage && selectedFacility) {
+    if (selectedFacility.id === 1) {
+      // Central Library Full Page
+      return (
+        <div style={{ padding: "2rem", maxWidth: "1400px", margin: "0 auto" }}>
+          <button
+            onClick={handleBackToFacilities}
+            style={{
+              backgroundColor: selectedFacility.color,
+              color: "white",
+              border: "none",
+              padding: "0.8rem 1.5rem",
+              borderRadius: "5px",
+              cursor: "pointer",
+              marginBottom: "2rem",
+              fontSize: "1rem",
+            }}
+          >
+            ← Back to Facilities
+          </button>
+
+          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+            <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>
+              {selectedFacility.icon}
+            </div>
+            <h1
+              style={{
+                color: selectedFacility.color,
+                fontSize: "2.5rem",
+                marginBottom: "1rem",
+              }}
+            >
+              {selectedFacility.name}
+            </h1>
+            <p
+              style={{
+                fontSize: "1.1rem",
+                color: "#666",
+                lineHeight: "1.8",
+                maxWidth: "800px",
+                margin: "0 auto",
+              }}
+            >
+              {selectedFacility.details}
+            </p>
+          </div>
+
+          {/* Library Features Grid */}
+          <div style={{ marginBottom: "3rem" }}>
+            <h2
+              style={{
+                color: selectedFacility.color,
+                textAlign: "center",
+                marginBottom: "2rem",
+              }}
+            >
+              Library Features
+            </h2>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                gap: "1rem",
+              }}
+            >
+              {selectedFacility.features.map((feature, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: "1rem",
+                    backgroundColor: "white",
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    textAlign: "center",
+                    border: `2px solid ${selectedFacility.color}`,
+                  }}
+                >
+                  <h3 style={{ color: selectedFacility.color, margin: 0 }}>
+                    {feature}
+                  </h3>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Online Resources */}
+          <div style={{ marginBottom: "3rem" }}>
+            <h2
+              style={{
+                color: selectedFacility.color,
+                textAlign: "center",
+                marginBottom: "2rem",
+              }}
+            >
+              Online Resources
+            </h2>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: "1.5rem",
+              }}
+            >
+              {selectedFacility.onlineResources.map((resource, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: "1.5rem",
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    border: `1px solid ${selectedFacility.color}20`,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "2rem",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    {resource.icon}
+                  </div>
+                  <h3
+                    style={{
+                      color: selectedFacility.color,
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    {resource.title}
+                  </h3>
+                  <p style={{ color: "#666", fontSize: "0.9rem" }}>
+                    {resource.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Collection Statistics */}
+          <div style={{ marginBottom: "3rem" }}>
+            <h2
+              style={{
+                color: selectedFacility.color,
+                textAlign: "center",
+                marginBottom: "2rem",
+              }}
+            >
+              Collection Statistics
+            </h2>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "2rem",
+              }}
+            >
+              {/* Physical Collection */}
+              <div
+                style={{
+                  padding: "1.5rem",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "10px",
+                }}
+              >
+                <h3
+                  style={{
+                    color: selectedFacility.color,
+                    textAlign: "center",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  Physical Collection
+                </h3>
+                {selectedFacility.collectionData.physical.map((item, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "0.5rem 0",
+                      borderBottom:
+                        index <
+                        selectedFacility.collectionData.physical.length - 1
+                          ? "1px solid #ddd"
+                          : "none",
+                    }}
+                  >
+                    <span style={{ color: "#444" }}>{item.type}</span>
+                    <span
+                      style={{
+                        color: selectedFacility.color,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {item.count}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Digital Collection */}
+              <div
+                style={{
+                  padding: "1.5rem",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "10px",
+                }}
+              >
+                <h3
+                  style={{
+                    color: selectedFacility.color,
+                    textAlign: "center",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  Digital Collection
+                </h3>
+                {selectedFacility.collectionData.digital.map((item, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "0.5rem 0",
+                      borderBottom:
+                        index <
+                        selectedFacility.collectionData.digital.length - 1
+                          ? "1px solid #ddd"
+                          : "none",
+                    }}
+                  >
+                    <span style={{ color: "#444" }}>{item.type}</span>
+                    <span
+                      style={{
+                        color: selectedFacility.color,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {item.count}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Library Staff */}
+          <div style={{ marginBottom: "3rem" }}>
+            <h2
+              style={{
+                color: selectedFacility.color,
+                textAlign: "center",
+                marginBottom: "2rem",
+              }}
+            >
+              Library Staff
+            </h2>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+                gap: "2rem",
+              }}
+            >
+              {selectedFacility.staff.map((member, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: "2rem",
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    textAlign: "center",
+                    border: `2px solid ${selectedFacility.color}20`,
+                  }}
+                >
+                  <img
+                    src={member.image}
+                    alt={member.name}
+                    style={{
+                      width: "120px",
+                      height: "150px",
+                      objectFit: "cover",
+                      borderRadius: "10px",
+                      marginBottom: "1rem",
+                    }}
+                  />
+                  <h3
+                    style={{
+                      color: selectedFacility.color,
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    {member.name}
+                  </h3>
+                  <p
+                    style={{
+                      color: "#666",
+                      fontWeight: "bold",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    {member.position}
+                  </p>
+                  <p style={{ color: "#888", fontSize: "0.9rem" }}>
+                    {member.email}
+                  </p>
+                  <div style={{ marginTop: "1rem" }}>
+                    <h4
+                      style={{
+                        color: selectedFacility.color,
+                        fontSize: "1rem",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      Responsibilities:
+                    </h4>
+                    <ul
+                      style={{
+                        textAlign: "left",
+                        fontSize: "0.9rem",
+                        color: "#666",
+                        paddingLeft: "1rem",
+                      }}
+                    >
+                      {member.responsibilities.map((responsibility, idx) => (
+                        <li key={idx} style={{ marginBottom: "0.3rem" }}>
+                          {responsibility}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Support Staff */}
+          <div>
+            <h2
+              style={{
+                color: selectedFacility.color,
+                textAlign: "center",
+                marginBottom: "2rem",
+              }}
+            >
+              Support Staff
+            </h2>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: "1.5rem",
+              }}
+            >
+              {selectedFacility.supportStaff.map((member, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: "1.5rem",
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: "10px",
+                    textAlign: "center",
+                    border: `1px solid ${selectedFacility.color}30`,
+                  }}
+                >
+                  <h3
+                    style={{
+                      color: selectedFacility.color,
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    {member.name}
+                  </h3>
+                  <p
+                    style={{
+                      color: "#666",
+                      fontWeight: "bold",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    {member.position}
+                  </p>
+                  <p style={{ color: "#888", fontSize: "0.9rem" }}>
+                    {member.section}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    } else if (selectedFacility.id === 2) {
+      // CCF Full Page
+      return (
+        <div style={{ padding: "2rem", maxWidth: "1400px", margin: "0 auto" }}>
+          <button
+            onClick={handleBackToFacilities}
+            style={{
+              backgroundColor: selectedFacility.color,
+              color: "white",
+              border: "none",
+              padding: "0.8rem 1.5rem",
+              borderRadius: "5px",
+              cursor: "pointer",
+              marginBottom: "2rem",
+              fontSize: "1rem",
+            }}
+          >
+            ← Back to Facilities
+          </button>
+
+          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+            <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>
+              {selectedFacility.icon}
+            </div>
+            <h1
+              style={{
+                color: selectedFacility.color,
+                fontSize: "2.5rem",
+                marginBottom: "1rem",
+              }}
+            >
+              {selectedFacility.name}
+            </h1>
+            <p
+              style={{
+                fontSize: "1.1rem",
+                color: "#666",
+                lineHeight: "1.8",
+                maxWidth: "800px",
+                margin: "0 auto",
+              }}
+            >
+              {selectedFacility.details}
+            </p>
+          </div>
+
+          {/* CCF Sections Grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gap: "2rem",
+            }}
+          >
+            {selectedFacility.ccfSections.map((section, index) => (
+              <div
+                key={index}
+                onClick={() => handleCCFSectionClick(section)}
+                style={{
+                  padding: "2rem",
+                  backgroundColor: "white",
+                  borderRadius: "10px",
+                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                  cursor: "pointer",
+                  textAlign: "center",
+                  border: `2px solid ${selectedFacility.color}20`,
+                  transition: "all 0.3s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = "translateY(-5px)";
+                  e.target.style.boxShadow = "0 8px 15px rgba(0,0,0,0.15)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = "translateY(0)";
+                  e.target.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "3rem",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  {section.icon}
+                </div>
+                <h3
+                  style={{
+                    color: selectedFacility.color,
+                    marginBottom: "1rem",
+                    fontSize: "1.3rem",
+                  }}
+                >
+                  {section.title}
+                </h3>
+                <p
+                  style={{
+                    color: "#666",
+                    fontSize: "0.95rem",
+                    lineHeight: "1.6",
+                  }}
+                >
+                  {section.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    } else if (selectedFacility.id === 4) {
+      // Dispensary Full Page
+      return (
+        <div style={{ padding: "2rem", maxWidth: "1400px", margin: "0 auto" }}>
+          <button
+            onClick={handleBackToFacilities}
+            style={{
+              backgroundColor: selectedFacility.color,
+              color: "white",
+              border: "none",
+              padding: "0.8rem 1.5rem",
+              borderRadius: "5px",
+              cursor: "pointer",
+              marginBottom: "2rem",
+              fontSize: "1rem",
+            }}
+          >
+            ← Back to Facilities
+          </button>
+
+          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+            <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>
+              {selectedFacility.icon}
+            </div>
+            <h1
+              style={{
+                color: selectedFacility.color,
+                fontSize: "2.5rem",
+                marginBottom: "1rem",
+              }}
+            >
+              {selectedFacility.name}
+            </h1>
+            <p
+              style={{
+                fontSize: "1.1rem",
+                color: "#666",
+                lineHeight: "1.8",
+                maxWidth: "800px",
+                margin: "0 auto",
+              }}
+            >
+              {selectedFacility.details}
+            </p>
+          </div>
+
+          {/* Medical Officers */}
+          <div style={{ marginBottom: "3rem" }}>
+            <h2
+              style={{
+                color: selectedFacility.color,
+                textAlign: "center",
+                marginBottom: "2rem",
+              }}
+            >
+              Medical Officers
+            </h2>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+                gap: "2rem",
+              }}
+            >
+              {/* Senior Medical Officer */}
+              <div
+                style={{
+                  padding: "2rem",
+                  backgroundColor: "white",
+                  borderRadius: "10px",
+                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                  textAlign: "center",
+                  border: `2px solid ${selectedFacility.color}20`,
+                }}
+              >
+                <img
+                  src={selectedFacility.dispensaryData.seniorMedicalOfficer.image}
+                  alt={selectedFacility.dispensaryData.seniorMedicalOfficer.name}
+                  style={{
+                    width: "120px",
+                    height: "150px",
+                    objectFit: "cover",
+                    borderRadius: "10px",
+                    marginBottom: "1rem",
+                  }}
+                />
+                <h3
+                  style={{
+                    color: selectedFacility.color,
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  {selectedFacility.dispensaryData.seniorMedicalOfficer.name}
+                </h3>
+                <p
+                  style={{
+                    color: "#666",
+                    fontSize: "0.9rem",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  {selectedFacility.dispensaryData.seniorMedicalOfficer.qualification}
+                </p>
+                <p
+                  style={{
+                    color: "#666",
+                    fontWeight: "bold",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  {selectedFacility.dispensaryData.seniorMedicalOfficer.designation}
+                </p>
+                <p style={{ color: "#888", fontSize: "0.9rem", marginBottom: "0.3rem" }}>
+                  📧 {selectedFacility.dispensaryData.seniorMedicalOfficer.email}
+                </p>
+                <p style={{ color: "#888", fontSize: "0.9rem" }}>
+                  📱 {selectedFacility.dispensaryData.seniorMedicalOfficer.mobile}
+                </p>
+              </div>
+
+              {/* Medical Officer */}
+              <div
+                style={{
+                  padding: "2rem",
+                  backgroundColor: "white",
+                  borderRadius: "10px",
+                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                  textAlign: "center",
+                  border: `2px solid ${selectedFacility.color}20`,
+                }}
+              >
+                <img
+                  src={selectedFacility.dispensaryData.medicalOfficer.image}
+                  alt={selectedFacility.dispensaryData.medicalOfficer.name}
+                  style={{
+                    width: "120px",
+                    height: "150px",
+                    objectFit: "cover",
+                    borderRadius: "10px",
+                    marginBottom: "1rem",
+                  }}
+                />
+                <h3
+                  style={{
+                    color: selectedFacility.color,
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  {selectedFacility.dispensaryData.medicalOfficer.name}
+                </h3>
+                <p
+                  style={{
+                    color: "#666",
+                    fontWeight: "bold",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  Medical Officer
+                </p>
+                <p style={{ color: "#888", fontSize: "0.9rem", marginBottom: "0.3rem" }}>
+                  📧 {selectedFacility.dispensaryData.medicalOfficer.email}
+                </p>
+                <p style={{ color: "#888", fontSize: "0.9rem" }}>
+                  📱 {selectedFacility.dispensaryData.medicalOfficer.mobile}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Visiting Consultants */}
+          <div style={{ marginBottom: "3rem" }}>
+            <h2
+              style={{
+                color: selectedFacility.color,
+                textAlign: "center",
+                marginBottom: "2rem",
+              }}
+            >
+              Visiting Consultants
+            </h2>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: "1.5rem",
+              }}
+            >
+              {selectedFacility.dispensaryData.visitingConsultants.map((consultant, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: "1.5rem",
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: "10px",
+                    border: `1px solid ${selectedFacility.color}30`,
+                  }}
+                >
+                  <h3
+                    style={{
+                      color: selectedFacility.color,
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    {consultant.name}
+                  </h3>
+                  <p
+                    style={{
+                      color: "#666",
+                      fontWeight: "bold",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    {consultant.specialization}
+                  </p>
+                  {consultant.qualification && (
+                    <p
+                      style={{
+                        color: "#888",
+                        fontSize: "0.9rem",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      {consultant.qualification}
+                    </p>
+                  )}
+                  <p
+                    style={{
+                      color: "#666",
+                      fontSize: "0.9rem",
+                      backgroundColor: "white",
+                      padding: "0.5rem",
+                      borderRadius: "5px",
+                    }}
+                  >
+                    🕐 {consultant.schedule}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Ambulance Services */}
+          <div>
+            <h2
+              style={{
+                color: selectedFacility.color,
+                textAlign: "center",
+                marginBottom: "2rem",
+              }}
+            >
+              Ambulance Services
+            </h2>
+            <div
+              style={{
+                backgroundColor: "#f8f9fa",
+                padding: "2rem",
+                borderRadius: "10px",
+                border: `2px solid ${selectedFacility.color}20`,
+              }}
+            >
+              <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+                <h3
+                  style={{
+                    color: selectedFacility.color,
+                    fontSize: "1.5rem",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  Emergency Contact
+                </h3>
+                <p
+                  style={{
+                    fontSize: "1.8rem",
+                    fontWeight: "bold",
+                    color: selectedFacility.color,
+                  }}
+                >
+                  📞 {selectedFacility.dispensaryData.ambulance.contact}
+                </p>
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                  gap: "1.5rem",
+                  marginBottom: "2rem",
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: "white",
+                    padding: "1.5rem",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <h4
+                    style={{
+                      color: selectedFacility.color,
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    Operating Hours
+                  </h4>
+                  <p style={{ color: "#666", marginBottom: "0.5rem" }}>
+                    <strong>Availability:</strong> {selectedFacility.dispensaryData.ambulance.timing.availability}
+                  </p>
+                  <p style={{ color: "#666", marginBottom: "0.5rem" }}>
+                    <strong>Morning:</strong> {selectedFacility.dispensaryData.ambulance.timing.morning}
+                  </p>
+                  <p style={{ color: "#666" }}>
+                    <strong>Evening:</strong> {selectedFacility.dispensaryData.ambulance.timing.evening}
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: "white",
+                    padding: "1.5rem",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <h4
+                    style={{
+                      color: selectedFacility.color,
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    Facilities Available
+                  </h4>
+                  <ul style={{ paddingLeft: "1rem", color: "#666" }}>
+                    {selectedFacility.dispensaryData.ambulance.facilities.map((facility, idx) => (
+                      <li key={idx} style={{ marginBottom: "0.3rem" }}>
+                        {facility}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // Main Facilities Page
+  return (
+    <div style={{ padding: "2rem", maxWidth: "1400px", margin: "0 auto" }}>
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+        <h1
+          style={{
+            color: "#333",
+            fontSize: "2.5rem",
+            marginBottom: "1rem",
+          }}
+        >
+          Campus Facilities
+        </h1>
+        <p
+          style={{
+            fontSize: "1.1rem",
+            color: "#666",
+            lineHeight: "1.8",
+            maxWidth: "800px",
+            margin: "0 auto",
+          }}
+        >
+          Explore the comprehensive range of facilities available at MANIT
+          Bhopal, designed to support academic excellence, research innovation,
+          and student life.
+        </p>
+      </div>
+
+      {/* Facilities Grid */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
+          gap: "2rem",
+        }}
+      >
+        {facilitiesData.map((facility) => (
+          <div
+            key={facility.id}
+            onClick={() => handleFacilityClick(facility)}
+            style={{
+              padding: "2rem",
+              backgroundColor: "white",
+              borderRadius: "12px",
+              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              border: `3px solid ${facility.color}20`,
+              position: "relative",
+              overflow: "hidden",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-8px)";
+              e.currentTarget.style.boxShadow = "0 12px 25px rgba(0,0,0,0.15)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
+            }}
+          >
+            <div
+              style={{
+                fontSize: "3rem",
+                marginBottom: "1rem",
+                textAlign: "center",
+              }}
+            >
+              {facility.icon}
+            </div>
+            <h3
+              style={{
+                color: facility.color,
+                fontSize: "1.4rem",
+                marginBottom: "1rem",
+                textAlign: "center",
+              }}
+            >
+              {facility.name}
+            </h3>
+            <p
+              style={{
+                color: "#666",
+                fontSize: "0.95rem",
+                lineHeight: "1.6",
+                textAlign: "center",
+                marginBottom: "1rem",
+              }}
+            >
+              {facility.description}
+            </p>
+            <div
+              style={{
+                textAlign: "center",
+                color: facility.color,
+                fontSize: "0.9rem",
+                fontWeight: "500",
+              }}
+            >
+              {facility.id === 1 || facility.id === 2 || facility.id === 4
+                ? "Click to explore →"
+                : selectedFacility?.id === facility.id
+                ? "Click to collapse"
+                : "Click to expand"}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Expanded Facility Details */}
+      {selectedFacility &&
+        selectedFacility.id !== 1 &&
+        selectedFacility.id !== 2 &&
+        selectedFacility.id !== 4 && (
+          <div
+            style={{
+              marginTop: "3rem",
+              padding: "2rem",
+              backgroundColor: `${selectedFacility.color}10`,
+              borderRadius: "12px",
+              border: `2px solid ${selectedFacility.color}30`,
+            }}
+          >
+            <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+              <div
+                style={{
+                  fontSize: "4rem",
+                  marginBottom: "1rem",
+                }}
+              >
+                {selectedFacility.icon}
+              </div>
+              <h2
+                style={{
+                  color: selectedFacility.color,
+                  fontSize: "2rem",
+                  marginBottom: "1rem",
+                }}
+              >
+                {selectedFacility.name}
+              </h2>
+              <p
+                style={{
+                  fontSize: "1.1rem",
+                  color: "#666",
+                  lineHeight: "1.8",
+                  maxWidth: "800px",
+                  margin: "0 auto",
+                }}
+              >
+                {selectedFacility.details}
+              </p>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <button
+                onClick={() => setSelectedFacility(null)}
+                style={{
+                  backgroundColor: selectedFacility.color,
+                  color: "white",
+                  border: "none",
+                  padding: "0.8rem 2rem",
+                  borderRadius: "25px",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                  fontWeight: "500",
+                }}
+              >
+                Close Details
+              </button>
+            </div>
+          </div>
+        )}
+    </div>
+  );
+}
