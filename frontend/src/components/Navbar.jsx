@@ -9,8 +9,9 @@ import {
   FaBriefcase,
   FaUsers,
   FaHome,
-  FaBell,
-  FaUser
+  FaUser,
+  FaFlask,
+  FaUniversity
 } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
 
@@ -18,13 +19,14 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { to: "/", label: "Home", icon: <FaHome /> },
+    { to: "/", label: "Home", icon: <FaHome />, dropdown: true, dropdownType: "home" },
     { to: "/administration", label: "Administration", icon: <FaUserTie /> },
-    { label: "Academics", icon: <FaBook />, dropdown: true }, // removed "to"
+    { label: "Academics", icon: <FaBook />, dropdown: true, dropdownType: "academics" },
+    { to: "/academics/departments", label: "Departments", icon: <FaUniversity /> },
     { to: "/facilities", label: "Facilities", icon: <FaBuilding /> },
+    { to: "/research", label: "Research", icon: <FaFlask />, dropdown: true, dropdownType: "research" },
     { to: "/tpc", label: "TPC", icon: <FaBriefcase /> },
     { to: "/clubs", label: "Clubs", icon: <FaUsers /> },
-    { to: "/notice", label: "Notice", icon: <FaBell /> },
   ];
 
   const academicDropdown = [
@@ -32,8 +34,24 @@ export default function Navbar() {
     { to: "/academics/ug", label: "UG Program" },
     { to: "/academics/pg", label: "PG Program" },
     { to: "/academics/phd", label: "PhD Program" },
-    { to: "/academics/departments", label: "Departments" },
     { to: "/academics/scholarship", label: "Scholarship" }
+  ];
+
+  const homeDropdown = [
+    { to: "/history", label: "History" },
+    { to: "/about-us", label: "About Us" },
+    { to: "/vision-goals", label: "Vision & Goals" }
+  ];
+
+  const researchDropdown = [
+    { to: "/research/area", label: "Area of Research" },
+    { to: "/research/projects", label: "Projects" },
+    { to: "/research/icsc", label: "Industrial Consultancy Service Center (ICSC)" },
+    { to: "/research/grants", label: "Research Support/Grants" },
+    { to: "/research/mous", label: "MOUs" },
+    { to: "/research/patents", label: "Patents" },
+    { to: "/research/publication", label: "Publication" },
+    { to: "/research/collaboration", label: "International Collaboration" }
   ];
 
   return (
@@ -50,15 +68,32 @@ export default function Navbar() {
           {navLinks.map((link) =>
             link.dropdown ? (
               <div key={link.label} className="relative group">
-                <div className="flex items-center gap-2 cursor-pointer text-gray-700 hover:text-blue-600 transition-colors duration-300">
-                  {link.icon}
-                  {link.label}
-                  <FaChevronDown className="text-xs mt-[2px]" />
-                </div>
+                {link.to ? (
+                  <NavLink
+                    to={link.to}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
+                        isActive ? "text-blue-600" : "text-gray-700 hover:text-blue-600"
+                      }`
+                    }
+                  >
+                    {link.icon}
+                    {link.label}
+                    <FaChevronDown className="text-xs mt-[2px]" />
+                  </NavLink>
+                ) : (
+                  <div className="flex items-center gap-2 cursor-pointer text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                    {link.icon}
+                    {link.label}
+                    <FaChevronDown className="text-xs mt-[2px]" />
+                  </div>
+                )}
 
                 {/* Dropdown Menu */}
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  {academicDropdown.map((item) => (
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white shadow-lg rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  {(link.dropdownType === "academics" ? academicDropdown : 
+                    link.dropdownType === "research" ? researchDropdown : 
+                    homeDropdown).map((item) => (
                     <NavLink
                       key={item.to}
                       to={item.to}
@@ -125,12 +160,28 @@ export default function Navbar() {
             {navLinks.map((link) =>
               link.dropdown ? (
                 <div key={link.label} className="w-full">
-                  <div className="flex items-center gap-2 text-lg text-gray-700">
-                    {link.icon}
-                    {link.label}
-                  </div>
+                  {link.to ? (
+                    <NavLink
+                      to={link.to}
+                      className={({ isActive }) =>
+                        `flex items-center gap-2 text-lg transition-colors duration-300
+                         ${isActive ? "text-blue-600" : "text-gray-700"}`
+                      }
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {link.icon}
+                      {link.label}
+                    </NavLink>
+                  ) : (
+                    <div className="flex items-center gap-2 text-lg text-gray-700">
+                      {link.icon}
+                      {link.label}
+                    </div>
+                  )}
                   <div className="ml-8 mt-2 flex flex-col gap-2">
-                    {academicDropdown.map((item) => (
+                    {(link.dropdownType === "academics" ? academicDropdown : 
+                      link.dropdownType === "research" ? researchDropdown : 
+                      homeDropdown).map((item) => (
                       <NavLink
                         key={item.to}
                         to={item.to}

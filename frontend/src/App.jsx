@@ -37,6 +37,16 @@ import PlacementTeam from "./pages/tpc/PlacementTeam.jsx";
 import PlacementPolicy from "./pages/tpc/PlacementPolicy.jsx";
 
 import Notice from "./pages/Notice.jsx";
+import ActsAndRules from "./pages/ActsAndRules.jsx";
+import RTIAndPublicGrievance from "./pages/RTIAndPublicGrievance.jsx";
+import AntiRagging from "./pages/AntiRagging.jsx";
+import NewslettersAndMagazines from "./pages/NewslettersAndMagazines.jsx";
+import Careers from "./pages/Careers.jsx";
+import Tender from "./pages/Tender.jsx";
+import History from "./pages/History.jsx";
+import AboutUs from "./pages/AboutUs.jsx";
+import VisionGoals from "./pages/VisionGoals.jsx";
+import Research from "./pages/Research.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 
@@ -87,6 +97,16 @@ function AppContent() {
           
           <Route path="/clubs" element={<Clubs />} />
           <Route path="/notice" element={<Notice />} />
+          <Route path="/acts-rules" element={<ActsAndRules />} />
+          <Route path="/rti-grievance" element={<RTIAndPublicGrievance />} />
+          <Route path="/anti-ragging" element={<AntiRagging />} />
+          <Route path="/newsletter" element={<NewslettersAndMagazines />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/tender" element={<Tender />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/vision-goals" element={<VisionGoals />} />
+          <Route path="/research" element={<Research />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/student-dashboard" element={

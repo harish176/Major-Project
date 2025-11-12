@@ -4,12 +4,20 @@ import { motion } from "framer-motion";
 import LifeAtManit from "../components/LifeatManit.jsx";
 import Location from "../components/Location.jsx";
 import Placements from "../components/Placements.jsx";
+import NoticeOverlay from "../components/NoticeOverlay.jsx";
+import InfoStrip from "../components/InfoStrip.jsx";
 
 const Home = () => {
   return (
     <div className="flex flex-col w-full">
+      {/* Notice Overlay Component */}
+      <NoticeOverlay />
+      
       {/* Carousel Section */}
       <Carousel />
+
+      {/* Info Strip Section */}
+      <InfoStrip />
 
       {/* Welcome Section */}
 <section className="relative w-full bg-gray-50 py-16 px-6 md:px-12 lg:px-24 overflow-hidden">
