@@ -14,10 +14,10 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    if (!['admin', 'student'].includes(role)) {
+    if (!['student'].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid role. Must be admin or student'
+        message: 'Invalid role. Must be student'
       });
     }
 

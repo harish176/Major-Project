@@ -193,7 +193,6 @@ const studentSchema = new mongoose.Schema({
 });
 
 // Additional indexes for better performance (unique fields already have indexes)
-studentSchema.index({ scholarNumber: 1 });
 studentSchema.index({ status: 1 });
 studentSchema.index({ createdAt: -1 });
 

@@ -119,7 +119,6 @@ const companiesSchema = new mongoose.Schema({
 });
 
 // Indexes for better query performance
-companiesSchema.index({ companyName: 1 });
 companiesSchema.index({ 'yearlyData.year': 1 });
 companiesSchema.index({ 'yearlyData.branchesAllowed': 1 });
 companiesSchema.index({ 'yearlyData.coursesAllowed': 1 });

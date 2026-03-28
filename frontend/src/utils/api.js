@@ -141,6 +141,7 @@ export const facultyAPI = {
   deleteFaculty: (id) => api.delete(`/faculty/${id}`),
   getFacultyStats: () => api.get('/faculty/stats'),
   searchFaculty: (params) => api.get('/faculty/search', { params }),
+  getAdministration: (params) => api.get('/faculty/public/administration', { params }),
 };
 
 export const tpcMemberAPI = {

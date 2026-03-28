@@ -15,12 +15,26 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const allowedDevOrigins = [
+  /^https?:\/\/localhost(?::\d+)?$/i,
+  /^https?:\/\/127\.0\.0\.1(?::\d+)?$/i
+];
+
 // Connect to MongoDB
 connectDB();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5000', 'http://localhost:5174'], // Vite dev server ports
+  origin: (origin, callback) => {
+    // Allow non-browser tools and server-to-server calls with no Origin header.
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    const allowed = allowedDevOrigins.some((pattern) => pattern.test(origin));
+    callback(null, allowed);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

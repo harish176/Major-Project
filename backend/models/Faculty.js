@@ -263,6 +263,43 @@ const facultySchema = new mongoose.Schema({
     enum: ['Assistant Professor', 'Associate Professor', 'Professor', 'HOD', 'Lecturer', 'Senior Lecturer', 'Principal', 'Director', 'Other'],
     trim: true
   },
+  category: {
+    type: String,
+    enum: ['chairperson', 'director', 'dean', 'registrar', 'finance-committee', 'faculty', 'tpc', 'other'],
+    default: 'faculty',
+    index: true
+  },
+  branch: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Branch cannot exceed 100 characters']
+  },
+  bio: {
+    type: String,
+    trim: true,
+    maxlength: [1200, 'Bio cannot exceed 1200 characters']
+  },
+  displayOrder: {
+    type: Number,
+    default: 0
+  },
+  profileImage: {
+    url: {
+      type: String,
+      trim: true,
+      default: null
+    },
+    publicId: {
+      type: String,
+      trim: true,
+      default: null
+    },
+    altText: {
+      type: String,
+      trim: true,
+      maxlength: [140, 'Alt text cannot exceed 140 characters']
+    }
+  },
   otherDesignation: {
     type: String,
     trim: true,
@@ -707,6 +744,7 @@ facultySchema.index({ department: 1 });
 facultySchema.index({ designation: 1 });
 facultySchema.index({ status: 1 });
 facultySchema.index({ createdAt: -1 });
+facultySchema.index({ category: 1, department: 1 });
 
 // Hash password before saving
 facultySchema.pre('save', async function(next) {

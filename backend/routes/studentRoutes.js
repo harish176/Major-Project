@@ -1,14 +1,10 @@
 import express from 'express';
 import {
   registerStudent,
-  getAllStudents,
   getStudentById,
-  updateStudent,
-  updateStudentStatus,
-  deleteStudent,
   getStudentStats
 } from '../controllers/studentController.js';
-import { adminOnly, studentOnly, authenticatedOnly } from '../middleware/authMiddleware.js';
+import { studentOnly, authenticatedOnly } from '../middleware/authMiddleware.js';
 import Student from '../models/Student.js';
 
 const router = express.Router();
@@ -20,8 +16,8 @@ router.post('/register', registerStudent);
 
 // @route   GET /api/students/stats
 // @desc    Get student statistics
-// @access  Private/Admin
-router.get('/stats', adminOnly, getStudentStats);
+// @access  Private
+router.get('/stats', authenticatedOnly, getStudentStats);
 
 // @route   GET /api/students/profile
 // @desc    Get current student's profile
@@ -96,11 +92,6 @@ router.put('/profile', studentOnly, async (req, res) => {
   }
 });
 
-// @route   GET /api/students
-// @desc    Get all students with pagination and filtering
-// @access  Private/Admin
-router.get('/', adminOnly, getAllStudents);
-
 // @route   GET /api/students/scholar/:scholarNumber
 // @desc    Get student by scholar number
 // @access  Private
@@ -134,20 +125,5 @@ router.get('/scholar/:scholarNumber', authenticatedOnly, async (req, res) => {
 // @desc    Get student by ID
 // @access  Private (Admin or own profile for student)
 router.get('/:id', authenticatedOnly, getStudentById);
-
-// @route   PUT /api/students/:id
-// @desc    Update student information
-// @access  Private/Admin
-router.put('/:id', adminOnly, updateStudent);
-
-// @route   PUT /api/students/:id/status
-// @desc    Update student status (approve/reject)
-// @access  Private/Admin
-router.put('/:id/status', adminOnly, updateStudentStatus);
-
-// @route   DELETE /api/students/:id
-// @desc    Delete student
-// @access  Private/Admin
-router.delete('/:id', adminOnly, deleteStudent);
 
 export default router;

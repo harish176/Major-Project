@@ -2,10 +2,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import Navbar from "./components/Navbar.jsx";
 import Administration from "./pages/Administration.jsx";
 import StudentDashboard from "./pages/student/StudentDashboard.jsx";
-import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
-import AdminStudents from "./pages/admin/AdminStudents.jsx";
-import AdminFaculty from "./pages/admin/AdminFaculty.jsx";
-import AdminTPC from "./pages/admin/AdminTPC.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Academics from "./pages/Academics.jsx";
 import Facilities from "./pages/Facilities.jsx";
@@ -14,8 +10,6 @@ import Clubs from "./pages/Clubs.jsx";
 import Home from "./pages/Home.jsx";
 import Footer from "./components/Footer.jsx";
 
-// Import Admin components
-// import AdminLayout from "./components/AdminLayout.jsx";
 import Director from "./pages/administration/Director.jsx";
 import FinanceCommittee from "./pages/administration/FinanceCommittee.jsx";
 import Chairperson from "./pages/administration/Chairperson.jsx";
@@ -55,7 +49,7 @@ function AppContent() {
   const location = useLocation();
   
   // Define routes where navbar and footer should be hidden
-  const hideNavbarRoutes = ['/student-dashboard', '/admin-dashboard', '/admin/students', '/admin/faculty', '/admin/tpc'];
+  const hideNavbarRoutes = ['/student-dashboard'];
   
   // Check if current route should hide navbar
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
@@ -112,26 +106,6 @@ function AppContent() {
           <Route path="/student-dashboard" element={
             <ProtectedRoute requiredRole="student">
               <StudentDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin-dashboard" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/students" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminStudents />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/faculty" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminFaculty />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/tpc" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminTPC />
             </ProtectedRoute>
           } />
 

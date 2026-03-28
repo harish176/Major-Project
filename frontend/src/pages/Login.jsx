@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaUser, FaLock, FaEye, FaEyeSlash, FaEnvelope, FaUserShield, FaGraduationCap } from 'react-icons/fa';
+import { FaLock, FaEye, FaEyeSlash, FaEnvelope, FaGraduationCap } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { showError, showSuccess, showLoading, dismissToast, ValidationMessages } from '../utils/toast.js';
 import { authAPI } from '../utils/api.js';
@@ -9,8 +9,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    role: 'student' // Default to student
+    password: ''
   });
 
   const handleInputChange = (e) => {
@@ -60,7 +59,7 @@ const Login = () => {
       const response = await authAPI.login({
         email: formData.email,
         password: formData.password,
-        role: formData.role
+        role: 'student'
       });
 
       // Always dismiss loading toast first
@@ -77,12 +76,7 @@ const Login = () => {
         localStorage.setItem('refreshToken', data.data.refreshToken);
         localStorage.setItem('user', JSON.stringify(data.data.user));
         
-        // Redirect based on role
-        if (data.data.user.role === 'admin') {
-          navigate('/admin-dashboard');
-        } else {
-          navigate('/student-dashboard');
-        }
+        navigate('/student-dashboard');
         
       } else {
         // Backend returned success: false
@@ -130,74 +124,26 @@ const Login = () => {
             <img src="/logo.jpg" alt="MANIT Logo" className="h-16 w-16" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {formData.role === 'admin' ? 'Admin Login' : 'Student Login'}
+            Student Login
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            {formData.role === 'student' && (
-              <>
-                Don't have an account?{' '}
-                <NavLink
-                  to="/signup"
-                  className="font-medium text-blue-600 hover:text-blue-500 cursor-pointer"
-                >
-                  Sign up
-                </NavLink>
-              </>
-            )}
-            {formData.role === 'admin' && (
-              <span className="text-red-600 font-medium">
-                Admin access only - Contact system administrator for account
-              </span>
-            )}
+            <>
+              Don't have an account?{' '}
+              <NavLink
+                to="/signup"
+                className="font-medium text-blue-600 hover:text-blue-500 cursor-pointer"
+              >
+                Sign up
+              </NavLink>
+            </>
           </p>
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            {/* Role Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Login as
-              </label>
-              <div className="flex gap-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="student"
-                    checked={formData.role === 'student'}
-                    onChange={handleInputChange}
-                    className="sr-only"
-                  />
-                  <div className={`flex items-center px-4 py-2 rounded-md border-2 transition-all duration-200 ${
-                    formData.role === 'student' 
-                      ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                      : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                  }`}>
-                    <FaGraduationCap className="mr-2" />
-                    <span className="font-medium">Student</span>
-                  </div>
-                </label>
-                
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="admin"
-                    checked={formData.role === 'admin'}
-                    onChange={handleInputChange}
-                    className="sr-only"
-                  />
-                  <div className={`flex items-center px-4 py-2 rounded-md border-2 transition-all duration-200 ${
-                    formData.role === 'admin' 
-                      ? 'border-red-500 bg-red-50 text-red-700' 
-                      : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                  }`}>
-                    <FaUserShield className="mr-2" />
-                    <span className="font-medium">Admin</span>
-                  </div>
-                </label>
-              </div>
+            <div className="flex items-center text-blue-700 bg-blue-50 border border-blue-200 rounded-md px-4 py-2">
+              <FaGraduationCap className="mr-2" />
+              <span className="font-medium">Student Portal Access</span>
             </div>
 
             <div>

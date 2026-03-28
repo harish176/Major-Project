@@ -1,7 +1,68 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Mail, Phone, Building2 } from "lucide-react";
+import { facultyAPI } from "../../utils/api";
+
+const fallbackImage = "https://placehold.co/200x200?text=Profile";
 
 const Chairperson = () => {
+  const [chairperson, setChairperson] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchChair = async () => {
+      try {
+        const { data } = await facultyAPI.getAdministration({ category: "chairperson", limit: 1 });
+        if (!mounted) return;
+        setChairperson(data?.data?.[0] || null);
+      } catch (err) {
+        setError("Unable to load chairperson details right now.");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchChair();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#002147] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading chairperson profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!chairperson || error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="bg-white shadow-lg rounded-xl p-8 text-center max-w-md mx-auto">
+          <p className="text-gray-700 font-medium mb-3">{error || "Chairperson profile is not available yet."}</p>
+          <p className="text-sm text-gray-500">Please check back after the administration updates their details.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const {
+    name,
+    designation,
+    department,
+    bio,
+    email,
+    contactNumber,
+    imageUrl,
+    altText
+  } = chairperson;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -9,51 +70,44 @@ const Chairperson = () => {
       transition={{ duration: 0.6 }}
       className="max-w-5xl mx-auto p-8 bg-white rounded-2xl shadow-lg space-y-8"
     >
-      {/* Title */}
-      <h1 className="text-3xl font-extrabold text-[#002147] text-center">
-        Chairperson
-      </h1>
+      <h1 className="text-3xl font-extrabold text-[#002147] text-center">Chairperson</h1>
 
-      {/* Profile */}
       <div className="flex flex-col md:flex-row items-center gap-8">
-        {/* Image */}
         <img
-          src="/chairperson.png" // <-- Add chairperson image in public/images
-          alt="Prof. (Retd.) Arvind A. Natu"
+          src={imageUrl || fallbackImage}
+          alt={altText || name}
           className="w-48 h-48 rounded-full object-cover shadow-md border-4 border-[#002147]"
         />
 
-        {/* Info */}
-        <div>
-          <h2 className="text-2xl font-bold text-[#002147]">
-            Prof. (Retd.) Arvind A. Natu
-          </h2>
-          <p className="text-gray-600 font-medium mt-1">
-            Chairperson, Board of Governors, MANIT Bhopal
-          </p>
+        <div className="space-y-2 text-center md:text-left">
+          <h2 className="text-2xl font-bold text-[#002147]">{name}</h2>
+          <p className="text-gray-700 font-medium">{designation || "Chairperson"}</p>
+          {department && (
+            <p className="text-gray-500 flex items-center justify-center md:justify-start gap-2">
+              <Building2 className="w-4 h-4" />
+              {department}
+            </p>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            {email && (
+              <span className="inline-flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-800 rounded-lg text-sm">
+                <Mail className="w-4 h-4" />
+                {email}
+              </span>
+            )}
+            {contactNumber && (
+              <span className="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 text-gray-800 rounded-lg text-sm">
+                <Phone className="w-4 h-4" />
+                {contactNumber}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Bio */}
       <div className="text-gray-700 space-y-4 leading-relaxed">
-        <p>
-          Prof. (Retd.) Arvind A. Natu is the current Chairperson of the Board of
-          Governors at MANIT Bhopal. With decades of academic and research
-          experience, he has significantly contributed to advancing higher
-          education and institutional governance in India.
-        </p>
-        <p>
-          He has held senior academic and administrative positions during his
-          career, contributing to policy formulation, research guidance, and
-          national-level committees. His leadership ensures the institute’s
-          smooth functioning and alignment with the vision of technical education
-          excellence in India.
-        </p>
-        <p>
-          As Chairperson, Prof. Natu provides strategic direction to the Board of
-          Governors, ensuring that MANIT continues to grow as a premier institute
-          fostering innovation, research, and skill development.
-        </p>
+        <p>{bio || "Chairperson biography will appear here once provided by the administration."}</p>
       </div>
     </motion.div>
   );

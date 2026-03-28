@@ -551,3 +551,64 @@ export const searchFaculty = async (req, res) => {
     });
   }
 };
+
+// @desc    Public endpoint for administration sections (chairperson, director, deans, faculty etc.)
+// @route   GET /api/faculty/public/administration
+// @access  Public
+export const getAdministrationFaculty = async (req, res) => {
+  try {
+    const { category, department, branch, limit } = req.query;
+
+    const query = { isActive: true };
+
+    if (category) {
+      const categories = (Array.isArray(category) ? category : String(category).split(',')).map(c => c.trim()).filter(Boolean);
+      if (categories.length > 0) {
+        query.category = { $in: categories };
+      }
+    }
+
+    if (department) {
+      query.department = new RegExp(department, 'i');
+    }
+
+    if (branch) {
+      query.branch = new RegExp(branch, 'i');
+    }
+
+    const max = Number(limit) > 0 ? Number(limit) : undefined;
+
+    const people = await Faculty.find(query)
+      .select('firstName middleName lastName email contactNumber department designation category branch bio photo profileImage subjectsTaught areasOfExpertise researchInterests committees administrativeRoles displayOrder')
+      .sort({ displayOrder: 1, createdAt: -1 })
+      .limit(max || 0);
+
+    const normalized = people.map(person => {
+      const obj = person.toObject({ virtuals: true });
+      obj.name = person.fullName;
+      obj.imageUrl = obj.profileImage?.url || obj.photo?.url || null;
+      obj.altText = obj.profileImage?.altText || obj.photo?.publicId || obj.designation || obj.name;
+      return obj;
+    });
+
+    const groupedByCategory = normalized.reduce((acc, item) => {
+      const key = item.category || 'uncategorized';
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+      return acc;
+    }, {});
+
+    res.json({
+      success: true,
+      data: normalized,
+      groupedByCategory
+    });
+
+  } catch (error) {
+    console.error('Get administration faculty error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
