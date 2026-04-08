@@ -20,7 +20,6 @@ const studentSchema = new mongoose.Schema({
   studentPhone: {
     type: String,
     required: [true, 'Student phone is required'],
-    unique: true,
     validate: {
       validator: function(v) {
         return /^\d{10}$/.test(v);
@@ -216,11 +215,9 @@ studentSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Static method to find student by email or phone
-studentSchema.statics.findByEmailOrPhone = function(email, phone) {
-  return this.findOne({
-    $or: [{ email }, { studentPhone: phone }]
-  });
+// Static method to find student by email
+studentSchema.statics.findByEmail = function(email) {
+  return this.findOne({ email });
 };
 
 // Virtual for full name (if needed)

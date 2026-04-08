@@ -8,6 +8,7 @@ import tpcMemberRoutes from './routes/tpcMemberRoutes.js';
 import companyRoutes from './routes/companyRoutes.js';
 import placementRoutes from './routes/placementRoutes.js';
 import connectDB from './config/db.js';
+import Student from './models/Student.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 
 dotenv.config();
@@ -19,9 +20,6 @@ const allowedDevOrigins = [
   /^https?:\/\/localhost(?::\d+)?$/i,
   /^https?:\/\/127\.0\.0\.1(?::\d+)?$/i
 ];
-
-// Connect to MongoDB
-connectDB();
 
 // Middleware
 app.use(cors({
@@ -68,6 +66,16 @@ app.use(notFound);
 // Global error handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+const startServer = async () => {
+  await connectDB();
+  await Student.syncIndexes();
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+};
+
+startServer().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
 });

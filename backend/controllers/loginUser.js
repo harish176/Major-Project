@@ -75,6 +75,7 @@ export const loginUser = async (req, res) => {
     // Prepare user data for response (excluding sensitive info)
     const userData = {
       id: user._id,
+      scholarNumber: user.scholarNumber,
       email: user.email,
       role: user.role,
       isActive: user.isActive,
@@ -166,6 +167,7 @@ export const refreshToken = async (req, res) => {
     // Prepare user data for response
     const userData = {
       id: user._id,
+      scholarNumber: user.scholarNumber,
       email: user.email,
       role: user.role,
       isActive: user.isActive,

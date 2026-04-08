@@ -4,6 +4,38 @@ import { useNavigate } from 'react-router-dom';
 import { showError, showSuccess, showLoading, dismissToast } from '../../utils/toast.js';
 import { studentAPI, authAPI } from '../../utils/api.js';
 
+const branchCodeMap = {
+  '2': 'Computer Science Engineering',
+  '3': 'Electronics & Communication Engineering',
+  '4': 'Mechanical Engineering',
+  '5': 'Electrical Engineering',
+  '6': 'Civil Engineering',
+  '7': 'MSME',
+  '8': 'MME'
+};
+
+const getScholarDetails = (scholarNumber) => {
+  const normalizedScholarNumber = (scholarNumber || '').toString().trim();
+
+  if (normalizedScholarNumber.length < 8) {
+    return {
+      joiningYear: 'N/A',
+      branch: 'N/A',
+      section: 'N/A'
+    };
+  }
+
+  const joiningYearDigits = normalizedScholarNumber.slice(0, 2);
+  const branchDigit = normalizedScholarNumber.charAt(4);
+  const sectionDigit = normalizedScholarNumber.charAt(7);
+
+  return {
+    joiningYear: `20${joiningYearDigits}`,
+    branch: branchCodeMap[branchDigit] || 'N/A',
+    section: sectionDigit || 'N/A'
+  };
+};
+
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -100,6 +132,8 @@ const StudentDashboard = () => {
     return null;
   }
 
+  const scholarDetails = getScholarDetails(user.scholarNumber || user.id);
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'approved': return 'text-green-600 bg-green-100';
@@ -180,8 +214,22 @@ const StudentDashboard = () => {
                   )}
                   <p className="text-sm text-gray-600 flex items-center mt-1">
                     <FaGraduationCap className="mr-2" />
-                    Student ID: {user.id}
+                    Student ID: {user.scholarNumber || user.id}
                   </p>
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-gray-600">
+                    <div className="rounded-md bg-gray-50 px-3 py-2">
+                      <span className="block text-xs uppercase tracking-wide text-gray-500">Joining Year</span>
+                      <span className="font-medium text-gray-900">{scholarDetails.joiningYear}</span>
+                    </div>
+                    <div className="rounded-md bg-gray-50 px-3 py-2">
+                      <span className="block text-xs uppercase tracking-wide text-gray-500">Branch</span>
+                      <span className="font-medium text-gray-900">{scholarDetails.branch}</span>
+                    </div>
+                    <div className="rounded-md bg-gray-50 px-3 py-2">
+                      <span className="block text-xs uppercase tracking-wide text-gray-500">Section</span>
+                      <span className="font-medium text-gray-900">{scholarDetails.section}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -150,38 +150,28 @@ const Signup = () => {
     }
     
     // Address Information Validation
-    if (!formData.state.trim()) {
-      showError('State is required');
+    if (formData.state.trim() && formData.state.trim().length > 50) {
+      showError('State cannot exceed 50 characters');
       return false;
     }
-    
-    if (!formData.city.trim()) {
-      showError('City is required');
+
+    if (formData.city.trim() && formData.city.trim().length > 50) {
+      showError('City cannot exceed 50 characters');
       return false;
     }
-    
-    if (!formData.pincode.trim()) {
-      showError('Pincode is required');
-      return false;
-    }
-    
-    if (!pincodeRegex.test(formData.pincode)) {
+
+    if (formData.pincode.trim() && !pincodeRegex.test(formData.pincode)) {
       showError('Please enter a valid 6-digit pincode');
       return false;
     }
-    
+
     // Personal Information Validation
-    if (!formData.nationality.trim()) {
-      showError('Nationality is required');
+    if (formData.nationality.trim() && formData.nationality.trim().length > 50) {
+      showError('Nationality cannot exceed 50 characters');
       return false;
     }
-    
-    if (!formData.aadharNumber.trim()) {
-      showError('Aadhar number is required');
-      return false;
-    }
-    
-    if (!aadharRegex.test(formData.aadharNumber.replace(/\s/g, ''))) {
+
+    if (formData.aadharNumber.trim() && !aadharRegex.test(formData.aadharNumber.replace(/\s/g, ''))) {
       showError('Please enter a valid 12-digit Aadhar number');
       return false;
     }
@@ -196,8 +186,8 @@ const Signup = () => {
       return;
     }
 
-    const loadingToastId = showLoading('Creating account...');
-    
+    let loadingToastId = null;
+
     try {
       let studentPhotoUrl = null;
       let studentPhotoPublicId = null;
@@ -206,7 +196,6 @@ const Signup = () => {
       if (formData.studentPhoto) {
         // Check Cloudinary configuration
         if (!isCloudinaryConfigured()) {
-          dismissToast(loadingToastId);
           const configStatus = getConfigurationStatus();
           console.warn('Cloudinary configuration status:', configStatus);
           showError('Image upload is not configured. Please contact administrator.');
@@ -214,7 +203,6 @@ const Signup = () => {
         }
 
         try {
-          dismissToast(loadingToastId);
           const uploadingToastId = showLoading('Uploading photo...');
           
           const uploadResult = await uploadImageToCloudinary(
@@ -231,7 +219,6 @@ const Signup = () => {
           dismissToast(processingToastId);
           
         } catch (uploadError) {
-          dismissToast(loadingToastId);
           console.error('Photo upload error:', uploadError);
           showError(`Photo upload failed: ${uploadError.message}`);
           return;
@@ -286,12 +273,10 @@ const Signup = () => {
         }
       });
 
-      const finalLoadingToastId = showLoading('Creating account...');
+      loadingToastId = showLoading('Creating account...');
 
       // Send data to backend using the API instance
       const response = await authAPI.signup(submitData);
-      
-      dismissToast(finalLoadingToastId);
       
       if (response.data && response.data.success) {
         showSuccess(response.data.message || ValidationMessages.SIGNUP_SUCCESS);
@@ -336,8 +321,6 @@ const Signup = () => {
       }
       
     } catch (error) {
-      dismissToast(loadingToastId);
-      
       // Error handling is done by axios interceptor, but we can add specific handling here
       if (error.response?.data?.message) {
         showError(error.response.data.message);
@@ -356,6 +339,10 @@ const Signup = () => {
       }
       
       console.error('Signup error:', error);
+    } finally {
+      if (loadingToastId) {
+        dismissToast(loadingToastId);
+      }
     }
   };
 
@@ -795,7 +782,7 @@ const Signup = () => {
             {/* State */}
             <div>
               <label htmlFor="state" className="block text-sm font-medium text-gray-700">
-                State *
+                State
               </label>
               <input
                 id="state"
@@ -811,7 +798,7 @@ const Signup = () => {
             {/* City */}
             <div>
               <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                City *
+                City
               </label>
               <input
                 id="city"
@@ -827,7 +814,7 @@ const Signup = () => {
             {/* Pincode */}
             <div>
               <label htmlFor="pincode" className="block text-sm font-medium text-gray-700">
-                Pincode *
+                Pincode
               </label>
               <input
                 id="pincode"
@@ -848,7 +835,7 @@ const Signup = () => {
             {/* Nationality */}
             <div>
               <label htmlFor="nationality" className="block text-sm font-medium text-gray-700">
-                Nationality *
+                Nationality
               </label>
               <input
                 id="nationality"
@@ -880,7 +867,7 @@ const Signup = () => {
             {/* Aadhar Number */}
             <div>
               <label htmlFor="aadharNumber" className="block text-sm font-medium text-gray-700">
-                Aadhar Number *
+                Aadhar Number
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

@@ -47,11 +47,11 @@ export const registerStudent = async (req, res) => {
     }
 
     // Check if student already exists
-    const existingStudent = await Student.findByEmailOrPhone(email, studentPhone);
+    const existingStudent = await Student.findByEmail(email);
     if (existingStudent) {
       return res.status(400).json({
         success: false,
-        message: 'Student with this email or phone number already exists'
+        message: 'Student with this email already exists'
       });
     }
 
@@ -324,21 +324,17 @@ export const updateStudent = async (req, res) => {
     // Remove password from update data for security
     delete updateData.password;
 
-    // Check if updating email or phone, ensure they're not already taken by another student
-    if (updateData.email || updateData.studentPhone) {
+    // Check if updating email, ensure it's not already taken by another student
+    if (updateData.email) {
       const existingStudent = await Student.findOne({
-        $or: [
-          updateData.email ? { email: updateData.email } : null,
-          updateData.studentPhone ? { studentPhone: updateData.studentPhone } : null
-        ].filter(Boolean),
+        email: updateData.email,
         _id: { $ne: studentId }
       });
 
       if (existingStudent) {
-        const duplicateField = existingStudent.email === updateData.email ? 'email' : 'phone number';
         return res.status(400).json({
           success: false,
-          message: `A student with this ${duplicateField} already exists`
+          message: 'A student with this email already exists'
         });
       }
     }
@@ -410,7 +406,6 @@ export const updateStudent = async (req, res) => {
       const duplicateField = Object.keys(error.keyPattern)[0];
       let fieldName = duplicateField;
       
-      if (duplicateField === 'studentPhone') fieldName = 'phone number';
       if (duplicateField === 'aadharNumber') fieldName = 'Aadhar number';
       if (duplicateField === 'scholarNumber') fieldName = 'scholar number';
       
