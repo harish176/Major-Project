@@ -1,64 +1,90 @@
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { tpcFacultyCoordinators } from "../../data/placementTPCFaculty.js";
-import { tpcstudentbtech } from "../../data/tpcstudentbtech.js";
 import { tpcstudentmtech } from "../../data/tpcstudentmtech.js";
-import { 
-  extractSessionsFromData, 
-  calculatePagination, 
-  createPageChangeHandler, 
-  filterAndSearchData
+import { tpcMemberAPI } from "../../utils/api.js";
+import {
+  extractSessionsFromData,
+  calculatePagination,
+  createPageChangeHandler,
+  filterAndSearchData,
 } from "./utils/sessionUtils.js";
 import PaginationControls from "./components/PaginationControls.jsx";
 
 export default function PlacementTeam() {
   const [selectedSession, setSelectedSession] = useState("2025-2026");
-  const [selectedStudentSession, setSelectedStudentSession] = useState("2025-2026");
+  const [selectedStudentSession, setSelectedStudentSession] = useState("");
   const [selectedMtechSession, setSelectedMtechSession] = useState("2025-2026");
   const [facultySearchTerm, setFacultySearchTerm] = useState("");
   const [studentSearchTerm, setStudentSearchTerm] = useState("");
   const [mtechSearchTerm, setMtechSearchTerm] = useState("");
+  const [btechStudents, setBtechStudents] = useState([]);
+  const [btechLoading, setBtechLoading] = useState(true);
+  const [btechError, setBtechError] = useState("");
   const [currentFacultyPage, setCurrentFacultyPage] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentMtechPage, setCurrentMtechPage] = useState(1);
   const studentsPerPage = 10;
   const facultyPerPage = 10;
 
+  useEffect(() => {
+    let mounted = true;
+
+    const loadBtechMembers = async () => {
+      try {
+        const { data } = await tpcMemberAPI.getMembersByCategory("b-tech");
+        if (!mounted) return;
+
+        const members = Array.isArray(data?.data) ? data.data : [];
+        setBtechStudents(members);
+      } catch (error) {
+        if (!mounted) return;
+        setBtechError("Unable to load B.Tech student members right now.");
+        setBtechStudents([]);
+      } finally {
+        if (mounted) setBtechLoading(false);
+      }
+    };
+
+    loadBtechMembers();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // Get faculty sessions from data using utility function
   const availableFacultySessions = useMemo(() => {
     return extractSessionsFromData(
       tpcFacultyCoordinators.training_placement_faculty_coordinators,
-      'session'
+      "session",
     );
   }, []);
 
   // Get B.Tech student sessions from data using utility function
   const availableStudentSessions = useMemo(() => {
-    return extractSessionsFromData(
-      tpcstudentbtech.training_placement_committee_2025_2026,
-      'session'
-    );
-  }, []);
+    return extractSessionsFromData(btechStudents, "session");
+  }, [btechStudents]);
 
   // Get M.Tech student sessions from data using utility function
   const availableMtechSessions = useMemo(() => {
     return extractSessionsFromData(
       tpcstudentmtech.mtech_training_placement_committee_2025_2026,
-      'session'
+      "session",
     );
   }, []);
 
   // Filter faculty based on selected session
   const filteredFaculty = useMemo(() => {
-    return tpcFacultyCoordinators.training_placement_faculty_coordinators.filter(faculty => 
-      faculty.session.includes(selectedSession)
+    return tpcFacultyCoordinators.training_placement_faculty_coordinators.filter(
+      (faculty) => faculty.session.includes(selectedSession),
     );
   }, [selectedSession]);
 
   // Get students data and available sessions
   const studentsData = useMemo(() => {
-    return tpcstudentbtech.training_placement_committee_2025_2026;
-  }, []);
+    return btechStudents;
+  }, [btechStudents]);
 
   // Get M.Tech students data
   const mtechStudentsData = useMemo(() => {
@@ -68,77 +94,109 @@ export default function PlacementTeam() {
   // Filter and search faculty
   const searchedFaculty = useMemo(() => {
     return filterAndSearchData(
-      filteredFaculty, 
-      selectedSession, 
-      facultySearchTerm, 
-      ['name', 'department', 'role']
+      filteredFaculty,
+      selectedSession,
+      facultySearchTerm,
+      ["name", "department", "role"],
     );
   }, [filteredFaculty, selectedSession, facultySearchTerm]);
 
   // Filter and search students
   const filteredAndSearchedStudents = useMemo(() => {
     return filterAndSearchData(
-      studentsData, 
-      selectedStudentSession, 
-      studentSearchTerm, 
-      ['name', 'department', 'role', 'team']
+      studentsData,
+      selectedStudentSession,
+      studentSearchTerm,
+      ["name", "department", "role", "team"],
     );
   }, [studentsData, selectedStudentSession, studentSearchTerm]);
 
   // Filter and search M.Tech students
   const filteredAndSearchedMtechStudents = useMemo(() => {
     return filterAndSearchData(
-      mtechStudentsData, 
-      selectedMtechSession, 
-      mtechSearchTerm, 
-      ['name', 'department', 'specialization']
+      mtechStudentsData,
+      selectedMtechSession,
+      mtechSearchTerm,
+      ["name", "department", "specialization"],
     );
   }, [mtechStudentsData, selectedMtechSession, mtechSearchTerm]);
 
   // Reset current page when search term or session changes
-  const resetFacultyPageOnChange = useMemo(() => {
+  useEffect(() => {
     setCurrentFacultyPage(1);
   }, [selectedSession, facultySearchTerm]);
 
-  const resetPageOnChange = useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [selectedStudentSession, studentSearchTerm]);
 
-  const resetMtechPageOnChange = useMemo(() => {
+  useEffect(() => {
     setCurrentMtechPage(1);
   }, [selectedMtechSession, mtechSearchTerm]);
+
+  useEffect(() => {
+    if (!selectedStudentSession && availableStudentSessions.length > 0) {
+      setSelectedStudentSession(availableStudentSessions[0]);
+    }
+  }, [selectedStudentSession, availableStudentSessions]);
 
   // Faculty Pagination calculations
   const {
     totalPages: totalFacultyPages,
     startIndex: facultyStartIndex,
     endIndex: facultyEndIndex,
-    currentItems: currentFaculty
-  } = useMemo(() => calculatePagination(searchedFaculty, currentFacultyPage, facultyPerPage), 
-    [searchedFaculty, currentFacultyPage, facultyPerPage]);
+    currentItems: currentFaculty,
+  } = useMemo(
+    () =>
+      calculatePagination(searchedFaculty, currentFacultyPage, facultyPerPage),
+    [searchedFaculty, currentFacultyPage, facultyPerPage],
+  );
 
   // B.Tech Pagination calculations
   const {
     totalPages,
     startIndex,
     endIndex,
-    currentItems: currentStudents
-  } = useMemo(() => calculatePagination(filteredAndSearchedStudents, currentPage, studentsPerPage), 
-    [filteredAndSearchedStudents, currentPage, studentsPerPage]);
+    currentItems: currentStudents,
+  } = useMemo(
+    () =>
+      calculatePagination(
+        filteredAndSearchedStudents,
+        currentPage,
+        studentsPerPage,
+      ),
+    [filteredAndSearchedStudents, currentPage, studentsPerPage],
+  );
 
   // M.Tech Pagination calculations
   const {
     totalPages: totalMtechPages,
     startIndex: mtechStartIndex,
     endIndex: mtechEndIndex,
-    currentItems: currentMtechStudents
-  } = useMemo(() => calculatePagination(filteredAndSearchedMtechStudents, currentMtechPage, studentsPerPage), 
-    [filteredAndSearchedMtechStudents, currentMtechPage, studentsPerPage]);
+    currentItems: currentMtechStudents,
+  } = useMemo(
+    () =>
+      calculatePagination(
+        filteredAndSearchedMtechStudents,
+        currentMtechPage,
+        studentsPerPage,
+      ),
+    [filteredAndSearchedMtechStudents, currentMtechPage, studentsPerPage],
+  );
 
   // Handle page change
-  const handleFacultyPageChange = createPageChangeHandler(setCurrentFacultyPage);
+  const handleFacultyPageChange = createPageChangeHandler(
+    setCurrentFacultyPage,
+  );
   const handlePageChange = createPageChangeHandler(setCurrentPage);
   const handleMtechPageChange = createPageChangeHandler(setCurrentMtechPage);
+
+  const studentDisplayStart =
+    filteredAndSearchedStudents.length > 0 ? startIndex + 1 : 0;
+  const studentDisplayEnd = Math.min(
+    endIndex,
+    filteredAndSearchedStudents.length,
+  );
 
   return (
     <motion.div
@@ -155,7 +213,10 @@ export default function PlacementTeam() {
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <label htmlFor="session-select" className="text-lg font-semibold text-[#002147]">
+            <label
+              htmlFor="session-select"
+              className="text-lg font-semibold text-[#002147]"
+            >
               Select Session:
             </label>
             <select
@@ -164,16 +225,19 @@ export default function PlacementTeam() {
               onChange={(e) => setSelectedSession(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#002147] focus:border-transparent"
             >
-              {availableFacultySessions.map(session => (
+              {availableFacultySessions.map((session) => (
                 <option key={session} value={session}>
                   {session}
                 </option>
               ))}
             </select>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <label htmlFor="faculty-search" className="text-lg font-semibold text-[#002147]">
+            <label
+              htmlFor="faculty-search"
+              className="text-lg font-semibold text-[#002147]"
+            >
               Search Faculty:
             </label>
             <input
@@ -186,9 +250,11 @@ export default function PlacementTeam() {
             />
           </div>
         </div>
-        
+
         <div className="mt-4 text-sm text-gray-600 text-center">
-          Showing {facultyStartIndex + 1}-{Math.min(facultyEndIndex, searchedFaculty.length)} of {searchedFaculty.length} faculty members for session {selectedSession}
+          Showing {facultyStartIndex + 1}-
+          {Math.min(facultyEndIndex, searchedFaculty.length)} of{" "}
+          {searchedFaculty.length} faculty members for session {selectedSession}
           {facultySearchTerm && ` matching "${facultySearchTerm}"`}
         </div>
       </div>
@@ -218,9 +284,9 @@ export default function PlacementTeam() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {currentFaculty.map((faculty, index) => (
-                <tr 
-                  key={faculty.sNo} 
-                  className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50 transition-colors`}
+                <tr
+                  key={faculty.sNo}
+                  className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition-colors`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {facultyStartIndex + index + 1}
@@ -235,7 +301,7 @@ export default function PlacementTeam() {
                     {faculty.department}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    <a 
+                    <a
                       href={`tel:+91${faculty.contact_no}`}
                       className="text-[#002147] hover:text-blue-600 hover:underline"
                     >
@@ -247,7 +313,7 @@ export default function PlacementTeam() {
             </tbody>
           </table>
         </div>
-        
+
         {searchedFaculty.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             No faculty members found for the selected criteria.
@@ -273,131 +339,154 @@ export default function PlacementTeam() {
           B.Tech Student TPC Members
         </h2>
 
-        {/* Student Session Filter and Search */}
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <label htmlFor="student-session-select" className="text-lg font-semibold text-[#002147]">
-                Select Session:
-              </label>
-              <select
-                id="student-session-select"
-                value={selectedStudentSession}
-                onChange={(e) => setSelectedStudentSession(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#002147] focus:border-transparent"
-              >
-                {availableStudentSessions.map(session => (
-                  <option key={session} value={session}>
-                    {session}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <label htmlFor="student-search" className="text-lg font-semibold text-[#002147]">
-                Search Students:
-              </label>
-              <input
-                id="student-search"
-                type="text"
-                placeholder="Search by name, department, role, or team..."
-                value={studentSearchTerm}
-                onChange={(e) => setStudentSearchTerm(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#002147] focus:border-transparent w-full sm:w-80"
-              />
-            </div>
+        {btechLoading ? (
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 text-center text-gray-600">
+            Loading B.Tech student members...
           </div>
-          
-          <div className="mt-4 text-sm text-gray-600 text-center">
-            Showing {startIndex + 1}-{Math.min(endIndex, filteredAndSearchedStudents.length)} of {filteredAndSearchedStudents.length} student members for session {selectedStudentSession}
-            {studentSearchTerm && ` matching "${studentSearchTerm}"`}
+        ) : btechError ? (
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 text-center text-red-600">
+            {btechError}
           </div>
-        </div>
-
-        {/* Student Table */}
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[#002147] text-white">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                    S.No
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                    Department
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                    Team
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                    Contact No
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {currentStudents.map((student, index) => (
-                  <tr 
-                    key={`${student.name}-${student.contact_no}`} 
-                    className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50 transition-colors`}
+        ) : (
+          <>
+            {/* Student Session Filter and Search */}
+            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <label
+                    htmlFor="student-session-select"
+                    className="text-lg font-semibold text-[#002147]"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {startIndex + index + 1}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#002147]">
-                      {student.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {student.department || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <div className="max-w-xs">
-                        {student.team}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        student.role.includes('Head') ? 'bg-red-100 text-red-800' :
-                        student.role.includes('Coordinator') ? 'bg-blue-100 text-blue-800' :
-                        student.role.includes('Co') ? 'bg-green-100 text-green-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {student.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      <a 
-                        href={`tel:+91${student.contact_no}`}
-                        className="text-[#002147] hover:text-blue-600 hover:underline"
-                      >
-                        +91 {student.contact_no}
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {filteredAndSearchedStudents.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              No students found for the selected criteria.
-            </div>
-          )}
-        </div>
+                    Select Session:
+                  </label>
+                  <select
+                    id="student-session-select"
+                    value={selectedStudentSession}
+                    onChange={(e) => setSelectedStudentSession(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#002147] focus:border-transparent"
+                  >
+                    {availableStudentSessions.map((session) => (
+                      <option key={session} value={session}>
+                        {session}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-        {/* B.Tech Pagination */}
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <label
+                    htmlFor="student-search"
+                    className="text-lg font-semibold text-[#002147]"
+                  >
+                    Search Students:
+                  </label>
+                  <input
+                    id="student-search"
+                    type="text"
+                    placeholder="Search by name, department, role, or team..."
+                    value={studentSearchTerm}
+                    onChange={(e) => setStudentSearchTerm(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#002147] focus:border-transparent w-full sm:w-80"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 text-sm text-gray-600 text-center">
+                Showing {studentDisplayStart}-{studentDisplayEnd} of{" "}
+                {filteredAndSearchedStudents.length} student members for session{" "}
+                {selectedStudentSession || "-"}
+                {studentSearchTerm && ` matching "${studentSearchTerm}"`}
+              </div>
+            </div>
+
+            {/* Student Table */}
+            <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[#002147] text-white">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        S.No
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Department
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Team
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Role
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Contact No
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {currentStudents.map((student, index) => (
+                      <tr
+                        key={`${student.name}-${student.contact_no}`}
+                        className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition-colors`}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {startIndex + index + 1}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#002147]">
+                          {student.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {student.department || "N/A"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          <div className="max-w-xs">{student.team}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${
+                              student.role.includes("Head")
+                                ? "bg-red-100 text-red-800"
+                                : student.role.includes("Coordinator")
+                                  ? "bg-blue-100 text-blue-800"
+                                  : student.role.includes("Co")
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {student.role}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          <a
+                            href={`tel:+91${student.contact_no}`}
+                            className="text-[#002147] hover:text-blue-600 hover:underline"
+                          >
+                            +91 {student.contact_no}
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {filteredAndSearchedStudents.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No students found for the selected criteria.
+                </div>
+              )}
+            </div>
+
+            {/* B.Tech Pagination */}
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </>
+        )}
       </motion.div>
 
       {/* M.Tech Student TPC Members Section */}
@@ -415,7 +504,10 @@ export default function PlacementTeam() {
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
             <div className="flex flex-col sm:flex-row items-center gap-4">
-              <label htmlFor="mtech-session-select" className="text-lg font-semibold text-[#002147]">
+              <label
+                htmlFor="mtech-session-select"
+                className="text-lg font-semibold text-[#002147]"
+              >
                 Select Session:
               </label>
               <select
@@ -424,16 +516,19 @@ export default function PlacementTeam() {
                 onChange={(e) => setSelectedMtechSession(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#002147] focus:border-transparent"
               >
-                {availableMtechSessions.map(session => (
+                {availableMtechSessions.map((session) => (
                   <option key={session} value={session}>
                     {session}
                   </option>
                 ))}
               </select>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row items-center gap-4">
-              <label htmlFor="mtech-search" className="text-lg font-semibold text-[#002147]">
+              <label
+                htmlFor="mtech-search"
+                className="text-lg font-semibold text-[#002147]"
+              >
                 Search M.Tech Students:
               </label>
               <input
@@ -446,9 +541,12 @@ export default function PlacementTeam() {
               />
             </div>
           </div>
-          
+
           <div className="mt-4 text-sm text-gray-600 text-center">
-            Showing {mtechStartIndex + 1}-{Math.min(mtechEndIndex, filteredAndSearchedMtechStudents.length)} of {filteredAndSearchedMtechStudents.length} M.Tech student members for session {selectedMtechSession}
+            Showing {mtechStartIndex + 1}-
+            {Math.min(mtechEndIndex, filteredAndSearchedMtechStudents.length)}{" "}
+            of {filteredAndSearchedMtechStudents.length} M.Tech student members
+            for session {selectedMtechSession}
             {mtechSearchTerm && ` matching "${mtechSearchTerm}"`}
           </div>
         </div>
@@ -478,9 +576,9 @@ export default function PlacementTeam() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {currentMtechStudents.map((student, index) => (
-                  <tr 
-                    key={`${student.name}-${student.contact_no}`} 
-                    className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50 transition-colors`}
+                  <tr
+                    key={`${student.name}-${student.contact_no}`}
+                    className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition-colors`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {mtechStartIndex + index + 1}
@@ -492,12 +590,10 @@ export default function PlacementTeam() {
                       {student.department}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700">
-                      <div className="max-w-xs">
-                        {student.specialization}
-                      </div>
+                      <div className="max-w-xs">{student.specialization}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      <a 
+                      <a
                         href={`tel:+91${student.contact_no}`}
                         className="text-[#002147] hover:text-blue-600 hover:underline"
                       >
@@ -509,7 +605,7 @@ export default function PlacementTeam() {
               </tbody>
             </table>
           </div>
-          
+
           {filteredAndSearchedMtechStudents.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               No M.Tech students found for the selected criteria.
@@ -524,7 +620,6 @@ export default function PlacementTeam() {
           onPageChange={handleMtechPageChange}
         />
       </motion.div>
-
     </motion.div>
   );
 }
