@@ -112,6 +112,7 @@ export const authAPI = {
 export const studentAPI = {
   register: (studentData) => api.post('/students/register', studentData),
   getProfile: () => api.get('/students/profile'),
+  getTimetable: () => api.get('/students/timetable'),
   updateProfile: (data) => api.put('/students/profile', data),
   uploadPhoto: (formData) => api.post('/students/upload-photo', formData, {
     headers: {
@@ -207,6 +208,10 @@ export const placementAPI = {
 
   // Statistics
   getStats: () => api.get('/placements/stats'),
+};
+
+export const noticeAPI = {
+  getAllNotices: (params) => api.get('/notices', { params }),
 };
 
 export default api;

@@ -1,51 +1,158 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Bell, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { noticeAPI } from '../utils/api.js';
 
 const NoticeOverlay = () => {
+  const navigate = useNavigate();
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-  const [isFirstVisit, setIsFirstVisit] = useState(false);
   const [showSideButton, setShowSideButton] = useState(false);
+  const [notices, setNotices] = useState([]);
+  const [loadingNotices, setLoadingNotices] = useState(true);
+  const [showAllNotices, setShowAllNotices] = useState(false);
+  const [selectedNotice, setSelectedNotice] = useState(null);
 
-  // Notice data from the Notice component
-  const notices = [
-    {
-      id: 1,
-      title: "Even and Odd Semester Supplementary Examination Notice October 2025 Only for UG (Admitted Upto Academic Year 2021-22) and PG (Admitted Upto Academic Year 2022-23) to Be Filled on MIS",
-      date: "October 2025",
-      isNew: true
-    },
-    {
-      id: 2,
-      title: "Even and Odd Semester Supplementary Examination Notice October 2025 Only for UG (Admitted from Academic Year 2022-23 to 2024-25) and PG (Admitted in the Academic Year from 2023-24 to 2024-25) to Be Filled on ERP Smile",
-      date: "October 2025",
-      isNew: true
-    },
-    {
-      id: 3,
-      title: "Opening of central Library at 8:30 am for cleaning purpose",
-      date: "Recent",
-      isNew: true
-    },
-    {
-      id: 4,
-      title: "Revised Choices for Group C (Open Elective)- UG VII Semester (2025) M.A.N.I.T. Bhopal",
-      date: "26/09/2025",
-      isNew: false
-    },
-    {
-      id: 5,
-      title: "One Day Workshop on Entrepreneurship Awareness Programme (EAP) Sponsored program by MSME under ESDP Scheme",
-      date: "Upcoming",
-      isNew: true
-    },
-    {
-      id: 6,
-      title: "Six Days Online ATAL FDP on Emerging Power Converter Topologies and Control Methods for Electric Vehicles and Renewable Energy Systems",
-      date: "17th – 22nd November 2025",
-      isNew: true
+  const visibleNotices = showAllNotices ? notices : notices.slice(0, 5);
+  const hasMoreNotices = notices.length > 5;
+  const latestNoticeCount = notices.length > 5 ? 5 : notices.length;
+
+  const getNoticeTimestamp = (notice) => {
+    const dateValue = notice?.publishedAt || notice?.createdAt || notice?.updatedAt;
+    const timestamp = dateValue ? new Date(dateValue).getTime() : 0;
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+  };
+
+  const getAssetUrl = (asset) => {
+    if (!asset) {
+      return null;
     }
-  ];
+
+    if (typeof asset === 'string') {
+      return asset;
+    }
+
+    return (
+      asset.url
+      || asset.secure_url
+      || asset.fileUrl
+      || asset.fileURL
+      || asset.downloadUrl
+      || asset.path
+      || asset.location
+      || asset.Location
+      || null
+    );
+  };
+
+  const getPdfFileName = (notice) => {
+    const pdfAsset = notice?.pdf;
+    if (!pdfAsset) {
+      return 'notice.pdf';
+    }
+
+    if (typeof pdfAsset === 'object') {
+      return pdfAsset.original_filename
+        || pdfAsset.filename
+        || pdfAsset.name
+        || pdfAsset.fileName
+        || 'notice.pdf';
+    }
+
+    return 'notice.pdf';
+  };
+
+  const buildCloudinaryDownloadUrl = (pdfAsset, fallbackUrl) => {
+    const publicId = pdfAsset?.public_id || pdfAsset?.publicId;
+    if (!publicId) {
+      return fallbackUrl;
+    }
+
+    const cloudName = pdfAsset?.cloud_name || pdfAsset?.cloudName;
+    if (cloudName) {
+      return `https://res.cloudinary.com/${cloudName}/raw/upload/fl_attachment/${publicId}`;
+    }
+
+    return fallbackUrl;
+  };
+
+  const handleDownloadPdf = async (notice) => {
+    const rawPdfUrl = notice?.pdfUrl || getAssetUrl(notice?.pdf);
+    const pdfUrl = buildCloudinaryDownloadUrl(notice?.pdf, rawPdfUrl);
+
+    if (!pdfUrl) {
+      return;
+    }
+
+    const fileName = getPdfFileName(notice);
+
+    try {
+      const response = await fetch(pdfUrl);
+      if (!response.ok) {
+        throw new Error('Could not fetch PDF file');
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      // Fallback when cross-origin fetch is blocked: still open the file URL.
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.target = '_blank';
+      link.rel = 'noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+  };
+
+  const formatNoticeDate = (notice) => {
+    if (notice?.dateText) {
+      return notice.dateText;
+    }
+
+    const dateValue = notice?.publishedAt || notice?.createdAt;
+    if (dateValue) {
+      const parsed = new Date(dateValue);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+      }
+    }
+
+    return 'Recent';
+  };
+
+  useEffect(() => {
+    const fetchNotices = async () => {
+      try {
+        setLoadingNotices(true);
+        const response = await noticeAPI.getAllNotices();
+        const fetchedNotices = response?.data?.data || [];
+        const sortedNotices = [...fetchedNotices].sort((a, b) => getNoticeTimestamp(b) - getNoticeTimestamp(a));
+        setNotices(sortedNotices);
+      } catch (error) {
+        console.error('Failed to load notices:', error);
+        setNotices([]);
+      } finally {
+        setLoadingNotices(false);
+      }
+    };
+
+    fetchNotices();
+  }, []);
 
   useEffect(() => {
     // Check if overlay has been shown today
@@ -53,7 +160,6 @@ const NoticeOverlay = () => {
     const lastShown = localStorage.getItem('noticeOverlayLastShown');
     
     if (!lastShown || lastShown !== today) {
-      setIsFirstVisit(true);
       setIsOverlayOpen(true);
       localStorage.setItem('noticeOverlayLastShown', today);
     } else {
@@ -64,10 +170,17 @@ const NoticeOverlay = () => {
   const handleCloseOverlay = () => {
     setIsOverlayOpen(false);
     setShowSideButton(true);
+    setShowAllNotices(false);
+    setSelectedNotice(null);
   };
 
   const handleOpenOverlay = () => {
     setIsOverlayOpen(true);
+  };
+
+  const handleViewAllNotices = () => {
+    handleCloseOverlay();
+    navigate('/notice');
   };
 
   return (
@@ -103,7 +216,7 @@ const NoticeOverlay = () => {
                   <Bell size={28} />
                   <div>
                     <h2 className="text-xl font-bold">Latest Notices</h2>
-                    <p className="text-blue-100 text-sm">Important announcements</p>
+                    <p className="text-blue-100 text-sm">Important announcements ({latestNoticeCount})</p>
                   </div>
                 </div>
               </div>
@@ -111,13 +224,22 @@ const NoticeOverlay = () => {
               {/* Content */}
               <div className="flex-1 p-4 overflow-y-auto notice-overlay-scrollbar">
                 <div className="space-y-3">
-                  {notices.map((notice) => (
+                  {loadingNotices && (
+                    <div className="text-sm text-gray-600">Loading notices...</div>
+                  )}
+
+                  {!loadingNotices && visibleNotices.length === 0 && (
+                    <div className="text-sm text-gray-600">No notices available right now.</div>
+                  )}
+
+                  {!loadingNotices && visibleNotices.map((notice, index) => (
                     <motion.div
-                      key={notice.id}
+                      key={notice._id || notice.id || `${notice.title}-${index}`}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: notice.id * 0.05 }}
-                      className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all duration-300 hover:border-blue-300 bg-white"
+                      transition={{ delay: index * 0.05 }}
+                      className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all duration-300 hover:border-blue-300 bg-white cursor-pointer"
+                      onClick={() => setSelectedNotice(notice)}
                     >
                       <div className="flex items-start space-x-2 mb-2">
                         {notice.isNew && (
@@ -125,29 +247,107 @@ const NoticeOverlay = () => {
                             NEW
                           </span>
                         )}
-                        <span className="text-xs text-gray-500 flex-shrink-0">{notice.date}</span>
+                        <span className="text-xs text-gray-500 flex-shrink-0">{formatNoticeDate(notice)}</span>
                       </div>
                       <h3 className="font-medium text-gray-800 text-sm leading-relaxed mb-2 line-clamp-3">
                         {notice.title}
                       </h3>
-                      <button className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center space-x-1">
+                      <button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setSelectedNotice(notice);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center space-x-1"
+                      >
                         <span>Read more</span>
                         <ChevronRight size={14} />
                       </button>
                     </motion.div>
                   ))}
+
+                  {!loadingNotices && hasMoreNotices && (
+                    <button
+                      onClick={() => setShowAllNotices((previous) => !previous)}
+                      className="w-full border border-blue-200 text-blue-700 py-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
+                    >
+                      {showAllNotices ? 'Show Less' : `Show More (${notices.length - 5} more)`}
+                    </button>
+                  )}
                 </div>
 
                 <div className="mt-6 p-3 bg-gray-50 rounded-lg text-center">
                   <p className="text-gray-600 text-sm mb-3">
                     For more notices and updates
                   </p>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm w-full">
+                  <button
+                    onClick={handleViewAllNotices}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm w-full"
+                  >
                     View All Notices
                   </button>
                 </div>
               </div>
             </motion.div>
+
+            <AnimatePresence>
+              {selectedNotice && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-black/50 z-[10001] flex items-center justify-center p-4"
+                  onClick={(event) => {
+                    if (event.target === event.currentTarget) {
+                      setSelectedNotice(null);
+                    }
+                  }}
+                >
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 20, opacity: 0 }}
+                    className="bg-white w-full max-w-2xl max-h-[85vh] rounded-xl shadow-2xl overflow-hidden"
+                  >
+                    <div className="flex items-start justify-between p-4 border-b border-gray-200">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800 pr-4">{selectedNotice.title}</h3>
+                        <p className="text-xs text-gray-500 mt-1">{formatNoticeDate(selectedNotice)}</p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedNotice(null)}
+                        className="p-1.5 rounded-full hover:bg-gray-100"
+                      >
+                        <X size={16} className="text-gray-700" />
+                      </button>
+                    </div>
+
+                    <div className="p-4 overflow-y-auto max-h-[calc(85vh-80px)] space-y-4">
+                      <p className="text-sm text-gray-700 whitespace-pre-line">
+                        {selectedNotice.content || 'No additional description available for this notice.'}
+                      </p>
+
+                      {getAssetUrl(selectedNotice.image) && (
+                        <img
+                          src={getAssetUrl(selectedNotice.image)}
+                          alt={selectedNotice.title}
+                          className="w-full rounded-lg border border-gray-200"
+                        />
+                      )}
+
+                      {(selectedNotice.pdfUrl || getAssetUrl(selectedNotice.pdf)) && (
+                        <button
+                          onClick={() => handleDownloadPdf(selectedNotice)}
+                          className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
+                        >
+                          Download PDF
+                          <ChevronRight size={14} className="ml-1" />
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
@@ -167,7 +367,7 @@ const NoticeOverlay = () => {
               <Bell size={18} className="animate-pulse" />
               <span className="font-medium text-xs tracking-wider">NOTICES</span>
               <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold animate-bounce">
-                {notices.filter(n => n.isNew).length}
+                {latestNoticeCount}
               </div>
             </div>
             

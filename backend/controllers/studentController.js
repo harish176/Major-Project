@@ -1,5 +1,54 @@
 import Student from '../models/Student.js';
 import bcrypt from 'bcrypt';
+import Timetable from '../models/Timetable.js';
+
+const branchCodeMap = {
+  '2': 'Computer Science Engineering',
+  '3': 'Electronics & Communication Engineering',
+  '4': 'Mechanical Engineering',
+  '5': 'Electrical Engineering',
+  '6': 'Civil Engineering',
+  '7': 'MSME',
+  '8': 'MME'
+};
+
+const normalizeText = (value) => (value || '').toString().trim().toUpperCase();
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const branchAliases = {
+  CSE: ['CSE', 'COMPUTER SCIENCE ENGINEERING', 'COMPUTER SCIENCE AND ENGINEERING'],
+  ECE: ['ECE', 'ELECTRONICS & COMMUNICATION ENGINEERING', 'ELECTRONICS AND COMMUNICATION ENGINEERING'],
+  ME: ['ME', 'MECHANICAL ENGINEERING'],
+  EE: ['EE', 'ELECTRICAL ENGINEERING'],
+  CE: ['CE', 'CIVIL ENGINEERING'],
+  MSME: ['MSME'],
+  MME: ['MME', 'METALLURGICAL AND MATERIALS ENGINEERING']
+};
+
+const getBranchCandidates = (branch) => {
+  const normalizedBranch = normalizeText(branch);
+  const candidateSet = new Set([normalizedBranch]);
+
+  Object.values(branchAliases).forEach((aliases) => {
+    if (aliases.includes(normalizedBranch)) {
+      aliases.forEach((alias) => candidateSet.add(alias));
+    }
+  });
+
+  return Array.from(candidateSet);
+};
+
+const getBranchAndSectionForStudent = (student) => {
+  const scholarNumber = (student.scholarNumber || '').toString().trim();
+  const branchFromScholar = scholarNumber.length >= 5 ? branchCodeMap[scholarNumber.charAt(4)] : null;
+  const sectionFromScholar = scholarNumber.length >= 8 ? scholarNumber.charAt(7) : null;
+
+  return {
+    branch: (student.branch || branchFromScholar || '').toString().trim(),
+    section: (student.section || sectionFromScholar || '').toString().trim()
+  };
+};
 
 // @desc    Register a new student
 // @route   POST /api/students/register
@@ -509,6 +558,102 @@ export const getStudentStats = async (req, res) => {
 
   } catch (error) {
     console.error('Get student stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// @desc    Get timetable for logged-in student
+// @route   GET /api/students/timetable
+// @access  Private/Student
+export const getStudentTimetable = async (req, res) => {
+  try {
+    const student = await Student.findById(req.user.id).select('branch scholarNumber');
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    const { branch, section } = getBranchAndSectionForStudent(student);
+
+    if (!branch || !section) {
+      return res.status(400).json({
+        success: false,
+        message: 'Branch or section is missing for this student profile'
+      });
+    }
+
+    const normalizedSection = normalizeText(section);
+    const branchCandidates = getBranchCandidates(branch);
+
+    const sectionRegex = new RegExp(`^${escapeRegex(normalizedSection)}$`, 'i');
+    const branchRegexConditions = branchCandidates.map((candidate) => ({
+      branch: { $regex: new RegExp(`^${escapeRegex(candidate)}$`, 'i') }
+    }));
+
+    const sectionSpecificTimetable = await Timetable.findOne({
+      isActive: true,
+      $and: [
+        { $or: branchRegexConditions },
+        {
+          $or: [
+            { section: { $regex: sectionRegex } },
+            { section: { $regex: /^ALL$/i } }
+          ]
+        }
+      ]
+    }).sort({ updatedAt: -1 });
+
+    const branchOnlyTimetable = !sectionSpecificTimetable
+      ? await Timetable.findOne({
+          isActive: true,
+          $or: branchRegexConditions
+        }).sort({ updatedAt: -1 })
+      : null;
+
+    const timetable = sectionSpecificTimetable || branchOnlyTimetable;
+
+    if (!timetable) {
+      return res.status(404).json({
+        success: false,
+        message: `No timetable found for ${branch} section ${section}`,
+        criteria: {
+          branch,
+          section
+        }
+      });
+    }
+
+    const timetableData = timetable.toObject();
+    const normalizedSchedule = Array.isArray(timetableData.schedule)
+      ? timetableData.schedule
+      : Array.isArray(timetableData.entries)
+        ? timetableData.entries.map((entry) => ({
+            day: entry.day || '-',
+            time: entry.time || entry.timeSlot || '-',
+            subject: entry.subjectName || entry.subject || '-',
+            teacher: entry.teacher || '-',
+            room: entry.room || '-'
+          }))
+        : [];
+
+    timetableData.schedule = normalizedSchedule;
+
+    res.json({
+      success: true,
+      data: {
+        branch,
+        section,
+        timetable: timetableData
+      }
+    });
+  } catch (error) {
+    console.error('Get student timetable error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'

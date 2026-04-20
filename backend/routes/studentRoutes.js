@@ -2,7 +2,8 @@ import express from 'express';
 import {
   registerStudent,
   getStudentById,
-  getStudentStats
+  getStudentStats,
+  getStudentTimetable
 } from '../controllers/studentController.js';
 import { studentOnly, authenticatedOnly } from '../middleware/authMiddleware.js';
 import Student from '../models/Student.js';
@@ -45,6 +46,11 @@ router.get('/profile', studentOnly, async (req, res) => {
     });
   }
 });
+
+// @route   GET /api/students/timetable
+// @desc    Get current student's timetable by branch and section
+// @access  Private/Student
+router.get('/timetable', studentOnly, getStudentTimetable);
 
 // @route   PUT /api/students/profile
 // @desc    Update current student's profile

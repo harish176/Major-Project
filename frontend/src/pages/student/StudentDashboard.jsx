@@ -40,6 +40,10 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [timetableData, setTimetableData] = useState(null);
+  const [showTimetable, setShowTimetable] = useState(false);
+  const [timetableLoading, setTimetableLoading] = useState(false);
+  const [timetableError, setTimetableError] = useState('');
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -117,6 +121,32 @@ const StudentDashboard = () => {
     navigate('/login');
   };
 
+  const handleViewTimetable = async () => {
+    setShowTimetable(true);
+
+    if (timetableData || timetableLoading) {
+      return;
+    }
+
+    setTimetableLoading(true);
+    setTimetableError('');
+
+    try {
+      const response = await studentAPI.getTimetable();
+
+      if (response.data.success) {
+        setTimetableData(response.data.data);
+      } else {
+        setTimetableError('Could not load timetable. Please try again.');
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Could not load timetable. Please try again.';
+      setTimetableError(message);
+    } finally {
+      setTimetableLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -133,6 +163,8 @@ const StudentDashboard = () => {
   }
 
   const scholarDetails = getScholarDetails(user.scholarNumber || user.id);
+  const currentTimetable = timetableData?.timetable;
+  const scheduleRows = Array.isArray(currentTimetable?.schedule) ? currentTimetable.schedule : [];
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -293,13 +325,107 @@ const StudentDashboard = () => {
                   </div>
                 </div>
                 <div className="mt-3">
-                  <button className="text-sm font-medium text-purple-600 hover:text-purple-500">
+                  <button
+                    onClick={handleViewTimetable}
+                    className="text-sm font-medium text-purple-600 hover:text-purple-500"
+                  >
                     View Schedule →
                   </button>
                 </div>
               </div>
             </div>
           </div>
+
+          {showTimetable && (
+            <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
+              <div className="px-4 py-5 sm:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">My Timetable</h3>
+                  {timetableData?.branch && timetableData?.section && (
+                    <span className="text-sm text-gray-500">
+                      {timetableData.branch} | Section {timetableData.section}
+                    </span>
+                  )}
+                </div>
+
+                {timetableLoading && (
+                  <p className="text-sm text-gray-600">Loading timetable...</p>
+                )}
+
+                {!timetableLoading && timetableError && (
+                  <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
+                    {timetableError}
+                  </div>
+                )}
+
+                {!timetableLoading && !timetableError && currentTimetable && (
+                  <div className="space-y-4">
+                    {currentTimetable.title && (
+                      <p className="text-sm text-gray-700">
+                        <span className="font-medium">Title:</span> {currentTimetable.title}
+                      </p>
+                    )}
+
+                    {(currentTimetable.semester || currentTimetable.academicYear) && (
+                      <p className="text-sm text-gray-700">
+                        {currentTimetable.semester && <span>Semester: {currentTimetable.semester}</span>}
+                        {currentTimetable.semester && currentTimetable.academicYear && <span className="mx-2">|</span>}
+                        {currentTimetable.academicYear && <span>Year: {currentTimetable.academicYear}</span>}
+                      </p>
+                    )}
+
+                    {scheduleRows.length > 0 && (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 text-sm">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-3 py-2 text-left font-medium text-gray-700">Day</th>
+                              <th className="px-3 py-2 text-left font-medium text-gray-700">Time</th>
+                              <th className="px-3 py-2 text-left font-medium text-gray-700">Subject</th>
+                              <th className="px-3 py-2 text-left font-medium text-gray-700">Teacher</th>
+                              <th className="px-3 py-2 text-left font-medium text-gray-700">Room</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200 bg-white">
+                            {scheduleRows.map((item, index) => (
+                              <tr key={`${item.day || 'day'}-${item.time || 'time'}-${index}`}>
+                                <td className="px-3 py-2 text-gray-700">{item.day || '-'}</td>
+                                <td className="px-3 py-2 text-gray-700">{item.time || '-'}</td>
+                                <td className="px-3 py-2 text-gray-700">{item.subject || '-'}</td>
+                                <td className="px-3 py-2 text-gray-700">{item.teacher || '-'}</td>
+                                <td className="px-3 py-2 text-gray-700">{item.room || '-'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {currentTimetable.timetableUrl && (
+                      <a
+                        href={currentTimetable.timetableUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-block text-sm font-medium text-blue-600 hover:text-blue-500"
+                      >
+                        Open Timetable File
+                      </a>
+                    )}
+
+                    {currentTimetable.notes && (
+                      <p className="text-sm text-gray-600">{currentTimetable.notes}</p>
+                    )}
+
+                    {scheduleRows.length === 0 && !currentTimetable.timetableUrl && (
+                      <p className="text-sm text-gray-600">
+                        Timetable is available but has no class rows yet.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Recent Activity */}
           <div className="bg-white shadow rounded-lg">

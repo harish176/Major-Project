@@ -1,78 +1,54 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { noticeAPI } from '../utils/api.js';
 
 const Notice = () => {
-  const notices = [
-    {
-      id: 1,
-      title: "Even and Odd Semester Supplementary Examination Notice October 2025 Only for UG (Admitted Upto Academic Year 2021-22) and PG (Admitted Upto Academic Year 2022-23) to Be Filled on MIS",
-      date: "October 2025"
-    },
-    {
-      id: 2,
-      title: "Even and Odd Semester Supplementary Examination Notice October 2025 Only for UG (Admitted from Academic Year 2022-23 to 2024-25) and PG (Admitted in the Academic Year from 2023-24 to 2024-25) to Be Filled on ERP Smile",
-      date: "October 2025"
-    },
-    {
-      id: 3,
-      title: "Opening of central Library at 8:30 am for cleaning purpose",
-      date: "Recent"
-    },
-    {
-      id: 4,
-      title: "Revised Choices for Group C (Open Elective)- UG VII Semester (2025) M.A.N.I.T. Bhopal",
-      date: "26/09/2025"
-    },
-    {
-      id: 5,
-      title: "One Day Workshop on Entrepreneurship Awareness Programme (EAP) Sponsored program by MSME under ESDP Scheme",
-      date: "Upcoming"
-    },
-    {
-      id: 6,
-      title: "Exemption from Mandatory Use of FTMS Module under SAMARTH Portal for Certain Sections - reg.",
-      date: "Recent"
-    },
-    {
-      id: 7,
-      title: "Time Table for Mid Term examination",
-      date: "Recent"
-    },
-    {
-      id: 8,
-      title: "Circular for Shutdown of Power Supply",
-      date: "Recent"
-    },
-    {
-      id: 9,
-      title: "Six Days Online ATAL FDP on Emerging Power Converter Topologies and Control Methods for Electric Vehicles and Renewable Energy Systems",
-      date: "17th – 22nd November 2025"
-    },
-    {
-      id: 10,
-      title: "International Conference on Recent Trends in Functional Materials (ICRTFM-2025) Mode of Organization: Offline & Online",
-      date: "1st to 3rd DEC 2025"
-    },
-    {
-      id: 11,
-      title: "1st International Conference on Statistics, Optimization and Machine Learning",
-      date: "27th - 28th February, 2026"
-    },
-    {
-      id: 12,
-      title: "10th International Conference on Internet of Things and Connected Technologies (ICIoTCT) 2025 Mode of Organization: Hybrid",
-      date: "December 18th – 19th, 2025"
-    },
-    {
-      id: 13,
-      title: "Short Term Training Programme (Hybrid Mode) Recent Advances in Civil Engg for Sustainable Development (RACESD-2025)",
-      date: "Oct. 10 - 14, 2025"
-    },
-    {
-      id: 14,
-      title: "1st IEEE International Conference on Recent Trends in Computing and Smart Mobility (RCSM)",
-      date: "December 5th – 6th, 2025"
+  const [notices, setNotices] = useState([]);
+  const [loadingNotices, setLoadingNotices] = useState(true);
+
+  const getNoticeTimestamp = (notice) => {
+    const dateValue = notice?.publishedAt || notice?.createdAt || notice?.updatedAt;
+    const timestamp = dateValue ? new Date(dateValue).getTime() : 0;
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+  };
+
+  const formatNoticeDate = (notice) => {
+    if (notice?.dateText) {
+      return notice.dateText;
     }
-  ];
+
+    const dateValue = notice?.publishedAt || notice?.createdAt;
+    if (dateValue) {
+      const parsed = new Date(dateValue);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+      }
+    }
+
+    return 'Recent';
+  };
+
+  useEffect(() => {
+    const fetchNotices = async () => {
+      try {
+        setLoadingNotices(true);
+        const response = await noticeAPI.getAllNotices();
+        const fetchedNotices = response?.data?.data || [];
+        const sortedNotices = [...fetchedNotices].sort((a, b) => getNoticeTimestamp(b) - getNoticeTimestamp(a));
+        setNotices(sortedNotices);
+      } catch (error) {
+        console.error('Failed to fetch notices:', error);
+        setNotices([]);
+      } finally {
+        setLoadingNotices(false);
+      }
+    };
+
+    fetchNotices();
+  }, []);
 
   const quickLinks = [
     "Registration / Examination",
@@ -108,8 +84,16 @@ const Notice = () => {
             
             <div className="bg-white rounded-lg shadow-lg">
               <div className="divide-y divide-gray-200">
-                {notices.map((notice, index) => (
-                  <div key={notice.id} className="p-4 hover:bg-gray-50 transition-colors">
+                {loadingNotices && (
+                  <div className="p-4 text-sm text-gray-600 text-left">Loading notices...</div>
+                )}
+
+                {!loadingNotices && notices.length === 0 && (
+                  <div className="p-4 text-sm text-gray-600 text-left">No notices available right now.</div>
+                )}
+
+                {!loadingNotices && notices.map((notice, index) => (
+                  <div key={notice._id || notice.id || `${notice.title}-${index}`} className="p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0">
                         <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
@@ -122,7 +106,7 @@ const Notice = () => {
                         >
                           {notice.title}
                         </a>
-                        <p className="text-xs text-gray-500 mt-1 text-left">{notice.date}</p>
+                        <p className="text-xs text-gray-500 mt-1 text-left">{formatNoticeDate(notice)}</p>
                       </div>
                     </div>
                   </div>

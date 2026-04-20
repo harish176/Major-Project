@@ -7,6 +7,7 @@ import facultyRoutes from './routes/facultyRoutes.js';
 import tpcMemberRoutes from './routes/tpcMemberRoutes.js';
 import companyRoutes from './routes/companyRoutes.js';
 import placementRoutes from './routes/placementRoutes.js';
+import noticeRoutes from './routes/noticeRoutes.js';
 import connectDB from './config/db.js';
 import Student from './models/Student.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
@@ -48,6 +49,7 @@ app.use("/api/faculty", facultyRoutes);
 app.use("/api/tpc-members", tpcMemberRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/placements", placementRoutes);
+app.use('/api/notices', noticeRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
